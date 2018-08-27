@@ -45,6 +45,23 @@ Please cite Caffe in your publications if it helps your research:
     }
 
 # CAFFE-CapsNet
-This repository is for the paper "Generalized Capsule Networks with Trainable Routing Procedure". Basically we make the rouing prodedure become part of the training process. Currently, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. G-CapsNet is tested on MNIST and achieve comparible performance as normal CapsNet.
+This repository is for the paper "Generalized Capsule Networks with Trainable Routing Procedure". 
+
+G-CapsNet makes the rouing prodedure become part of the training process, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. 
+
+G-CapsNet is tested on MNIST and achieve comparible performance as normal CapsNet.
 
 ## Guidline
+To Train a "full-connected" version of G-CapsNet,
+```
+sh examples/mnist/train_full_connected_capsule.sh
+```
+To Train a "convolutioal" version of G-CapsNet
+```
+sh examples/mnist/train_g_conv_capsule.sh 
+```
+
+
+
+
+
