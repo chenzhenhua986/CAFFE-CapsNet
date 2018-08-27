@@ -49,7 +49,7 @@ This repository is for the paper "Generalized Capsule Networks with Trainable Ro
 
 G-CapsNet makes the rouing prodedure become part of the training process, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. 
 
-G-CapsNet is tested on MNIST and achieve comparible performance as normal CapsNet.
+G-CapsNet is tested on MNIST and achieves comparible performance as normal CapsNet.
 
 ## Guidline
 To Train a "full-connected" version of G-CapsNet, run
