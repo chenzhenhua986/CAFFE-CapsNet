@@ -1,0 +1,229 @@
+name: "LeNet"
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_train_lmdb"
+    batch_size: 1
+    backend: LMDB
+  }
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_test_lmdb"
+    batch_size: 1
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 9
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 9
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "capsule"
+  type: "Cap"
+  bottom: "conv2"
+  top: "capsule"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  cap_param {
+    input_capsule_dim: 8
+    output_capsule_dim: 16
+    output_capsule_num: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "margin"
+  type: "MarginLoss"
+  bottom: "capsule"
+  bottom: "label"
+  top: "loss"
+  margin_param {
+    num_class: 10
+    m_upper_bound: 0.9
+    m_lower_bound: 0.1
+    lambda: 0.5
+  }
+}
+layer {
+  name: "decode"
+  type: "InnerProduct"
+  bottom: "capsule"
+  top: "decode"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 512
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "decode"
+  top: "decode"
+}
+
+layer {
+  name: "decode1"
+  type: "InnerProduct"
+  bottom: "decode"
+  top: "decode1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1024
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "decode1"
+  top: "decode1"
+}
+
+layer {
+  name: "decode2"
+  type: "InnerProduct"
+  bottom: "decode1"
+  top: "decode2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 784
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "sigmoid"
+  type: "Sigmoid"
+  bottom: "decode2"
+  top: "sigmoid"
+}
+layer {
+  name: "flatdata"
+  type: "Flatten"
+  bottom: "data"
+  top: "flatdata"
+}
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "sigmoid"
+  bottom: "flatdata"
+  top: "loss1"
+  loss_weight: 0.0005
+}

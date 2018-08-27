@@ -1,0 +1,344 @@
+name: "LeNet"
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_train_lmdb"
+    batch_size: 32
+    backend: LMDB
+  }
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_test_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 5
+    stride: 2
+    pad: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "reshape"
+  type: "CapsuleReshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  capsule_reshape_param {
+    capsule_dim: 16
+  }
+}
+
+
+layer {
+  name: "squash1"
+  type: "Squash"
+  bottom: "conv2_reshaped"
+  top: "squash1"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+
+layer {
+  name: "cap_conv_transform"
+  type: "CapsuleConvTransform"
+  bottom: "squash1"
+  top: "cap_conv_transform"
+  capsule_conv_transform_param {
+    input_h: 14
+    input_w: 14
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    input_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+
+layer {
+  name: "cap_conv_routing"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform"
+  top: "cap_conv_routing"
+  capsule_conv_routing_param {
+    input_h: 14
+    input_w: 14
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+
+layer {
+  name: "squash2"
+  type: "Squash"
+  bottom: "cap_conv_routing"
+  top: "squash2"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+
+layer {
+  name: "cap_conv_transform1"
+  type: "CapsuleConvTransform"
+  bottom: "squash2"
+  top: "cap_conv_transform1"
+  capsule_conv_transform_param {
+    input_h: 6
+    input_w: 6
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 32
+    output_capsule_num: 32
+    input_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+
+layer {
+  name: "cap_conv_routing1"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform1"
+  top: "cap_conv_routing1"
+  capsule_conv_routing_param {
+    input_h: 6
+    input_w: 6
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 32
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+
+layer {
+  name: "squash3"
+  type: "Squash"
+  bottom: "cap_conv_routing1"
+  top: "squash3"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+
+layer {
+  name: "cap_conv_transform2"
+  type: "CapsuleConvTransform"
+  bottom: "squash3"
+  top: "cap_conv_transform2"
+  capsule_conv_transform_param {
+    input_h: 4
+    input_w: 4
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 32
+    output_capsule_num: 10
+    input_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+
+layer {
+  name: "cap_conv_routing2"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform2"
+  top: "cap_conv_routing2"
+  capsule_conv_routing_param {
+    input_h: 4
+    input_w: 4
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 32
+    output_capsule_num: 10
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+
+layer {
+  name: "squash4"
+  type: "Squash"
+  bottom: "cap_conv_routing2"
+  top: "squash4"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+
+layer {
+  name: "cap_len"
+  type: "CapsuleLen"
+  bottom: "squash4"
+  top: "cap_len"
+  include {
+    phase: TEST
+  }
+  capsule_len_param {
+    num_class: 10
+  }
+}
+
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "cap_len"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+
+layer {
+  name: "margin"
+  type: "MarginLoss"
+  bottom: "squash4"
+  bottom: "label"
+  top: "loss"
+  margin_param {
+    num_class: 10
+    m_upper_bound: 0.9
+    m_lower_bound: 0.1
+    lambda: 0.5
+  }
+}
+
+

@@ -1,0 +1,1088 @@
+I0625 17:46:57.221421 32898 caffe.cpp:204] Using GPUs 0
+I0625 17:46:57.250454 32898 caffe.cpp:209] GPU 0: TITAN X (Pascal)
+I0625 17:46:57.681922 32898 solver.cpp:45] Initializing solver from parameters: 
+test_iter: 100
+test_interval: 500
+base_lr: 0.001
+display: 1
+max_iter: 10000
+lr_policy: "inv"
+gamma: 0.0001
+power: 0.75
+momentum: 0.9
+snapshot: 1000
+snapshot_prefix: "examples/mnist/g_capsule"
+solver_mode: GPU
+device_id: 0
+net: "examples/mnist/g_capsule_train.prototxt"
+train_state {
+  level: 0
+  stage: ""
+}
+momentum2: 0.999
+type: "Adam"
+I0625 17:46:57.683130 32898 solver.cpp:102] Creating training net from net file: examples/mnist/g_capsule_train.prototxt
+I0625 17:46:57.684072 32898 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer mnist
+I0625 17:46:57.684098 32898 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer cap_len
+I0625 17:46:57.684105 32898 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I0625 17:46:57.684247 32898 net.cpp:51] Initializing net from parameters: 
+name: "LeNet"
+state {
+  phase: TRAIN
+  level: 0
+  stage: ""
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_train_lmdb"
+    batch_size: 128
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "reshape"
+  type: "CapsuleReshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  capsule_reshape_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "squash1"
+  type: "Squash"
+  bottom: "conv2_reshaped"
+  top: "squash1"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_conv_transform"
+  type: "CapsuleConvTransform"
+  bottom: "squash1"
+  top: "cap_conv_transform"
+  capsule_conv_transform_param {
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    input_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 14
+    input_w: 14
+  }
+}
+layer {
+  name: "cap_conv_routing"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform"
+  top: "cap_conv_routing"
+  capsule_conv_routing_param {
+    weight_filler {
+      type: "xavier"
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 14
+    input_w: 14
+  }
+}
+layer {
+  name: "squash2"
+  type: "Squash"
+  bottom: "cap_conv_routing"
+  top: "squash2"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_conv_transform1"
+  type: "CapsuleConvTransform"
+  bottom: "squash2"
+  top: "cap_conv_transform1"
+  capsule_conv_transform_param {
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 32
+    input_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 6
+    input_w: 6
+  }
+}
+layer {
+  name: "cap_conv_routing1"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform1"
+  top: "cap_conv_routing1"
+  capsule_conv_routing_param {
+    weight_filler {
+      type: "xavier"
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 32
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 6
+    input_w: 6
+  }
+}
+layer {
+  name: "squash3"
+  type: "Squash"
+  bottom: "cap_conv_routing1"
+  top: "squash3"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_conv_transform2"
+  type: "CapsuleConvTransform"
+  bottom: "squash3"
+  top: "cap_conv_transform2"
+  capsule_conv_transform_param {
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 32
+    input_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    output_capsule_num: 10
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 4
+    input_w: 4
+  }
+}
+layer {
+  name: "cap_conv_routing2"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform2"
+  top: "cap_conv_routing2"
+  capsule_conv_routing_param {
+    weight_filler {
+      type: "xavier"
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 32
+    output_capsule_num: 10
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 4
+    input_w: 4
+  }
+}
+layer {
+  name: "squash4"
+  type: "Squash"
+  bottom: "cap_conv_routing2"
+  top: "squash4"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "margin"
+  type: "MarginLoss"
+  bottom: "squash4"
+  bottom: "label"
+  top: "loss"
+  margin_param {
+    num_class: 10
+    m_upper_bound: 0.9
+    m_lower_bound: 0.1
+    lambda: 0.5
+  }
+}
+I0625 17:46:57.684386 32898 layer_factory.hpp:77] Creating layer mnist
+I0625 17:46:57.687404 32898 db_lmdb.cpp:35] Opened lmdb examples/mnist/mnist_train_lmdb
+I0625 17:46:57.687608 32898 net.cpp:84] Creating Layer mnist
+I0625 17:46:57.687626 32898 net.cpp:380] mnist -> data
+I0625 17:46:57.687654 32898 net.cpp:380] mnist -> label
+I0625 17:46:57.688946 32898 data_layer.cpp:45] output data size: 128,1,28,28
+I0625 17:46:57.691248 32898 net.cpp:122] Setting up mnist
+I0625 17:46:57.691284 32898 net.cpp:129] Top shape: 128 1 28 28 (100352)
+I0625 17:46:57.691294 32898 net.cpp:129] Top shape: 128 (128)
+I0625 17:46:57.691300 32898 net.cpp:137] Memory required for data: 401920
+I0625 17:46:57.691313 32898 layer_factory.hpp:77] Creating layer conv1
+I0625 17:46:57.691335 32898 net.cpp:84] Creating Layer conv1
+I0625 17:46:57.691344 32898 net.cpp:406] conv1 <- data
+I0625 17:46:57.691361 32898 net.cpp:380] conv1 -> conv1
+I0625 17:46:57.692945 32898 net.cpp:122] Setting up conv1
+I0625 17:46:57.692962 32898 net.cpp:129] Top shape: 128 32 14 14 (802816)
+I0625 17:46:57.692970 32898 net.cpp:137] Memory required for data: 3613184
+I0625 17:46:57.692987 32898 layer_factory.hpp:77] Creating layer relu1
+I0625 17:46:57.693001 32898 net.cpp:84] Creating Layer relu1
+I0625 17:46:57.693008 32898 net.cpp:406] relu1 <- conv1
+I0625 17:46:57.693017 32898 net.cpp:367] relu1 -> conv1 (in-place)
+I0625 17:46:57.693030 32898 net.cpp:122] Setting up relu1
+I0625 17:46:57.693038 32898 net.cpp:129] Top shape: 128 32 14 14 (802816)
+I0625 17:46:57.693045 32898 net.cpp:137] Memory required for data: 6824448
+I0625 17:46:57.693051 32898 layer_factory.hpp:77] Creating layer conv2
+I0625 17:46:57.693064 32898 net.cpp:84] Creating Layer conv2
+I0625 17:46:57.693071 32898 net.cpp:406] conv2 <- conv1
+I0625 17:46:57.693080 32898 net.cpp:380] conv2 -> conv2
+I0625 17:46:57.693287 32898 net.cpp:122] Setting up conv2
+I0625 17:46:57.693298 32898 net.cpp:129] Top shape: 128 32 14 14 (802816)
+I0625 17:46:57.693305 32898 net.cpp:137] Memory required for data: 10035712
+I0625 17:46:57.693317 32898 layer_factory.hpp:77] Creating layer reshape
+I0625 17:46:57.693330 32898 net.cpp:84] Creating Layer reshape
+I0625 17:46:57.693336 32898 net.cpp:406] reshape <- conv2
+I0625 17:46:57.693344 32898 net.cpp:380] reshape -> conv2_reshaped
+I0625 17:46:57.693373 32898 net.cpp:122] Setting up reshape
+I0625 17:46:57.693383 32898 net.cpp:129] Top shape: 128 392 16 (802816)
+I0625 17:46:57.693392 32898 net.cpp:137] Memory required for data: 13246976
+I0625 17:46:57.693398 32898 layer_factory.hpp:77] Creating layer squash1
+I0625 17:46:57.693411 32898 net.cpp:84] Creating Layer squash1
+I0625 17:46:57.693433 32898 net.cpp:406] squash1 <- conv2_reshaped
+I0625 17:46:57.693441 32898 net.cpp:380] squash1 -> squash1
+I0625 17:46:57.693507 32898 net.cpp:122] Setting up squash1
+I0625 17:46:57.693518 32898 net.cpp:129] Top shape: 128 392 16 (802816)
+I0625 17:46:57.693526 32898 net.cpp:137] Memory required for data: 16458240
+I0625 17:46:57.693532 32898 layer_factory.hpp:77] Creating layer cap_conv_transform
+I0625 17:46:57.693545 32898 net.cpp:84] Creating Layer cap_conv_transform
+I0625 17:46:57.693552 32898 net.cpp:406] cap_conv_transform <- squash1
+I0625 17:46:57.693563 32898 net.cpp:380] cap_conv_transform -> cap_conv_transform
+I0625 17:46:57.696593 32898 net.cpp:122] Setting up cap_conv_transform
+I0625 17:46:57.696612 32898 net.cpp:129] Top shape: 128 1152 32 16 (75497472)
+I0625 17:46:57.696620 32898 net.cpp:137] Memory required for data: 318448128
+I0625 17:46:57.696635 32898 layer_factory.hpp:77] Creating layer cap_conv_routing
+I0625 17:46:57.696651 32898 net.cpp:84] Creating Layer cap_conv_routing
+I0625 17:46:57.696660 32898 net.cpp:406] cap_conv_routing <- cap_conv_transform
+I0625 17:46:57.696671 32898 net.cpp:380] cap_conv_routing -> cap_conv_routing
+I0625 17:46:57.696727 32898 net.cpp:122] Setting up cap_conv_routing
+I0625 17:46:57.696738 32898 net.cpp:129] Top shape: 128 1152 16 (2359296)
+I0625 17:46:57.696744 32898 net.cpp:137] Memory required for data: 327885312
+I0625 17:46:57.696753 32898 layer_factory.hpp:77] Creating layer squash2
+I0625 17:46:57.696779 32898 net.cpp:84] Creating Layer squash2
+I0625 17:46:57.696787 32898 net.cpp:406] squash2 <- cap_conv_routing
+I0625 17:46:57.696799 32898 net.cpp:380] squash2 -> squash2
+I0625 17:46:57.696848 32898 net.cpp:122] Setting up squash2
+I0625 17:46:57.696858 32898 net.cpp:129] Top shape: 128 1152 16 (2359296)
+I0625 17:46:57.696866 32898 net.cpp:137] Memory required for data: 337322496
+I0625 17:46:57.696871 32898 layer_factory.hpp:77] Creating layer cap_conv_transform1
+I0625 17:46:57.696883 32898 net.cpp:84] Creating Layer cap_conv_transform1
+I0625 17:46:57.696890 32898 net.cpp:406] cap_conv_transform1 <- squash2
+I0625 17:46:57.696898 32898 net.cpp:380] cap_conv_transform1 -> cap_conv_transform1
+I0625 17:46:57.704797 32898 net.cpp:122] Setting up cap_conv_transform1
+I0625 17:46:57.704815 32898 net.cpp:129] Top shape: 128 512 288 16 (301989888)
+I0625 17:46:57.704823 32898 net.cpp:137] Memory required for data: 1545282048
+I0625 17:46:57.704835 32898 layer_factory.hpp:77] Creating layer cap_conv_routing1
+I0625 17:46:57.704846 32898 net.cpp:84] Creating Layer cap_conv_routing1
+I0625 17:46:57.704854 32898 net.cpp:406] cap_conv_routing1 <- cap_conv_transform1
+I0625 17:46:57.704864 32898 net.cpp:380] cap_conv_routing1 -> cap_conv_routing1
+I0625 17:46:57.704913 32898 net.cpp:122] Setting up cap_conv_routing1
+I0625 17:46:57.704922 32898 net.cpp:129] Top shape: 128 512 16 (1048576)
+I0625 17:46:57.704928 32898 net.cpp:137] Memory required for data: 1549476352
+I0625 17:46:57.704936 32898 layer_factory.hpp:77] Creating layer squash3
+I0625 17:46:57.704946 32898 net.cpp:84] Creating Layer squash3
+I0625 17:46:57.704952 32898 net.cpp:406] squash3 <- cap_conv_routing1
+I0625 17:46:57.704959 32898 net.cpp:380] squash3 -> squash3
+I0625 17:46:57.704998 32898 net.cpp:122] Setting up squash3
+I0625 17:46:57.705008 32898 net.cpp:129] Top shape: 128 512 16 (1048576)
+I0625 17:46:57.705014 32898 net.cpp:137] Memory required for data: 1553670656
+I0625 17:46:57.705020 32898 layer_factory.hpp:77] Creating layer cap_conv_transform2
+I0625 17:46:57.705030 32898 net.cpp:84] Creating Layer cap_conv_transform2
+I0625 17:46:57.705036 32898 net.cpp:406] cap_conv_transform2 <- squash3
+I0625 17:46:57.705046 32898 net.cpp:380] cap_conv_transform2 -> cap_conv_transform2
+I0625 17:46:57.705602 32898 net.cpp:122] Setting up cap_conv_transform2
+I0625 17:46:57.705612 32898 net.cpp:129] Top shape: 128 10 512 16 (10485760)
+I0625 17:46:57.705619 32898 net.cpp:137] Memory required for data: 1595613696
+I0625 17:46:57.705631 32898 layer_factory.hpp:77] Creating layer cap_conv_routing2
+I0625 17:46:57.705655 32898 net.cpp:84] Creating Layer cap_conv_routing2
+I0625 17:46:57.705663 32898 net.cpp:406] cap_conv_routing2 <- cap_conv_transform2
+I0625 17:46:57.705672 32898 net.cpp:380] cap_conv_routing2 -> cap_conv_routing2
+I0625 17:46:57.705721 32898 net.cpp:122] Setting up cap_conv_routing2
+I0625 17:46:57.705731 32898 net.cpp:129] Top shape: 128 10 16 (20480)
+I0625 17:46:57.705737 32898 net.cpp:137] Memory required for data: 1595695616
+I0625 17:46:57.705745 32898 layer_factory.hpp:77] Creating layer squash4
+I0625 17:46:57.705754 32898 net.cpp:84] Creating Layer squash4
+I0625 17:46:57.705760 32898 net.cpp:406] squash4 <- cap_conv_routing2
+I0625 17:46:57.705768 32898 net.cpp:380] squash4 -> squash4
+I0625 17:46:57.705801 32898 net.cpp:122] Setting up squash4
+I0625 17:46:57.705811 32898 net.cpp:129] Top shape: 128 10 16 (20480)
+I0625 17:46:57.705816 32898 net.cpp:137] Memory required for data: 1595777536
+I0625 17:46:57.705822 32898 layer_factory.hpp:77] Creating layer margin
+I0625 17:46:57.705840 32898 net.cpp:84] Creating Layer margin
+I0625 17:46:57.705847 32898 net.cpp:406] margin <- squash4
+I0625 17:46:57.705854 32898 net.cpp:406] margin <- label
+I0625 17:46:57.705863 32898 net.cpp:380] margin -> loss
+I0625 17:46:57.705919 32898 net.cpp:122] Setting up margin
+I0625 17:46:57.705927 32898 net.cpp:129] Top shape: (1)
+I0625 17:46:57.705934 32898 net.cpp:132]     with loss weight 1
+I0625 17:46:57.705963 32898 net.cpp:137] Memory required for data: 1595777540
+I0625 17:46:57.705971 32898 net.cpp:198] margin needs backward computation.
+I0625 17:46:57.705977 32898 net.cpp:198] squash4 needs backward computation.
+I0625 17:46:57.705984 32898 net.cpp:198] cap_conv_routing2 needs backward computation.
+I0625 17:46:57.705991 32898 net.cpp:198] cap_conv_transform2 needs backward computation.
+I0625 17:46:57.705997 32898 net.cpp:198] squash3 needs backward computation.
+I0625 17:46:57.706003 32898 net.cpp:198] cap_conv_routing1 needs backward computation.
+I0625 17:46:57.706009 32898 net.cpp:198] cap_conv_transform1 needs backward computation.
+I0625 17:46:57.706015 32898 net.cpp:198] squash2 needs backward computation.
+I0625 17:46:57.706022 32898 net.cpp:198] cap_conv_routing needs backward computation.
+I0625 17:46:57.706028 32898 net.cpp:198] cap_conv_transform needs backward computation.
+I0625 17:46:57.706035 32898 net.cpp:198] squash1 needs backward computation.
+I0625 17:46:57.706041 32898 net.cpp:198] reshape needs backward computation.
+I0625 17:46:57.706048 32898 net.cpp:198] conv2 needs backward computation.
+I0625 17:46:57.706054 32898 net.cpp:198] relu1 needs backward computation.
+I0625 17:46:57.706060 32898 net.cpp:198] conv1 needs backward computation.
+I0625 17:46:57.706068 32898 net.cpp:200] mnist does not need backward computation.
+I0625 17:46:57.706073 32898 net.cpp:242] This network produces output loss
+I0625 17:46:57.706090 32898 net.cpp:255] Network initialization done.
+I0625 17:46:57.706872 32898 solver.cpp:190] Creating test net (#0) specified by net file: examples/mnist/g_capsule_train.prototxt
+I0625 17:46:57.706912 32898 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer mnist
+I0625 17:46:57.707053 32898 net.cpp:51] Initializing net from parameters: 
+name: "LeNet"
+state {
+  phase: TEST
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_test_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "reshape"
+  type: "CapsuleReshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  capsule_reshape_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "squash1"
+  type: "Squash"
+  bottom: "conv2_reshaped"
+  top: "squash1"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_conv_transform"
+  type: "CapsuleConvTransform"
+  bottom: "squash1"
+  top: "cap_conv_transform"
+  capsule_conv_transform_param {
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    input_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 14
+    input_w: 14
+  }
+}
+layer {
+  name: "cap_conv_routing"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform"
+  top: "cap_conv_routing"
+  capsule_conv_routing_param {
+    weight_filler {
+      type: "xavier"
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 14
+    input_w: 14
+  }
+}
+layer {
+  name: "squash2"
+  type: "Squash"
+  bottom: "cap_conv_routing"
+  top: "squash2"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_conv_transform1"
+  type: "CapsuleConvTransform"
+  bottom: "squash2"
+  top: "cap_conv_transform1"
+  capsule_conv_transform_param {
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 32
+    input_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 6
+    input_w: 6
+  }
+}
+layer {
+  name: "cap_conv_routing1"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform1"
+  top: "cap_conv_routing1"
+  capsule_conv_routing_param {
+    weight_filler {
+      type: "xavier"
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 32
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 6
+    input_w: 6
+  }
+}
+layer {
+  name: "squash3"
+  type: "Squash"
+  bottom: "cap_conv_routing1"
+  top: "squash3"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_conv_transform2"
+  type: "CapsuleConvTransform"
+  bottom: "squash3"
+  top: "cap_conv_transform2"
+  capsule_conv_transform_param {
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 32
+    input_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    output_capsule_num: 10
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 4
+    input_w: 4
+  }
+}
+layer {
+  name: "cap_conv_routing2"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform2"
+  top: "cap_conv_routing2"
+  capsule_conv_routing_param {
+    weight_filler {
+      type: "xavier"
+    }
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 32
+    output_capsule_num: 10
+    output_capsule_shape {
+      dim: 4
+      dim: 4
+    }
+    input_h: 4
+    input_w: 4
+  }
+}
+layer {
+  name: "squash4"
+  type: "Squash"
+  bottom: "cap_conv_routing2"
+  top: "squash4"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+layer {
+  name: "cap_len"
+  type: "CapsuleLen"
+  bottom: "squash4"
+  top: "cap_len"
+  include {
+    phase: TEST
+  }
+  capsule_len_param {
+    num_class: 10
+  }
+}
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "cap_len"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: "margin"
+  type: "MarginLoss"
+  bottom: "squash4"
+  bottom: "label"
+  top: "loss"
+  margin_param {
+    num_class: 10
+    m_upper_bound: 0.9
+    m_lower_bound: 0.1
+    lambda: 0.5
+  }
+}
+I0625 17:46:57.707176 32898 layer_factory.hpp:77] Creating layer mnist
+I0625 17:46:57.708323 32898 db_lmdb.cpp:35] Opened lmdb examples/mnist/mnist_test_lmdb
+I0625 17:46:57.708570 32898 net.cpp:84] Creating Layer mnist
+I0625 17:46:57.708604 32898 net.cpp:380] mnist -> data
+I0625 17:46:57.708642 32898 net.cpp:380] mnist -> label
+I0625 17:46:57.708729 32898 data_layer.cpp:45] output data size: 100,1,28,28
+I0625 17:46:57.711014 32898 net.cpp:122] Setting up mnist
+I0625 17:46:57.711031 32898 net.cpp:129] Top shape: 100 1 28 28 (78400)
+I0625 17:46:57.711040 32898 net.cpp:129] Top shape: 100 (100)
+I0625 17:46:57.711046 32898 net.cpp:137] Memory required for data: 314000
+I0625 17:46:57.711053 32898 layer_factory.hpp:77] Creating layer label_mnist_1_split
+I0625 17:46:57.711066 32898 net.cpp:84] Creating Layer label_mnist_1_split
+I0625 17:46:57.711074 32898 net.cpp:406] label_mnist_1_split <- label
+I0625 17:46:57.711082 32898 net.cpp:380] label_mnist_1_split -> label_mnist_1_split_0
+I0625 17:46:57.711096 32898 net.cpp:380] label_mnist_1_split -> label_mnist_1_split_1
+I0625 17:46:57.711155 32898 net.cpp:122] Setting up label_mnist_1_split
+I0625 17:46:57.711166 32898 net.cpp:129] Top shape: 100 (100)
+I0625 17:46:57.711174 32898 net.cpp:129] Top shape: 100 (100)
+I0625 17:46:57.711179 32898 net.cpp:137] Memory required for data: 314800
+I0625 17:46:57.711186 32898 layer_factory.hpp:77] Creating layer conv1
+I0625 17:46:57.711200 32898 net.cpp:84] Creating Layer conv1
+I0625 17:46:57.711207 32898 net.cpp:406] conv1 <- data
+I0625 17:46:57.711216 32898 net.cpp:380] conv1 -> conv1
+I0625 17:46:57.711419 32898 net.cpp:122] Setting up conv1
+I0625 17:46:57.711431 32898 net.cpp:129] Top shape: 100 32 14 14 (627200)
+I0625 17:46:57.711437 32898 net.cpp:137] Memory required for data: 2823600
+I0625 17:46:57.711449 32898 layer_factory.hpp:77] Creating layer relu1
+I0625 17:46:57.711463 32898 net.cpp:84] Creating Layer relu1
+I0625 17:46:57.711488 32898 net.cpp:406] relu1 <- conv1
+I0625 17:46:57.711513 32898 net.cpp:367] relu1 -> conv1 (in-place)
+I0625 17:46:57.711524 32898 net.cpp:122] Setting up relu1
+I0625 17:46:57.711532 32898 net.cpp:129] Top shape: 100 32 14 14 (627200)
+I0625 17:46:57.711539 32898 net.cpp:137] Memory required for data: 5332400
+I0625 17:46:57.711546 32898 layer_factory.hpp:77] Creating layer conv2
+I0625 17:46:57.711561 32898 net.cpp:84] Creating Layer conv2
+I0625 17:46:57.711568 32898 net.cpp:406] conv2 <- conv1
+I0625 17:46:57.711577 32898 net.cpp:380] conv2 -> conv2
+I0625 17:46:57.711840 32898 net.cpp:122] Setting up conv2
+I0625 17:46:57.711853 32898 net.cpp:129] Top shape: 100 32 14 14 (627200)
+I0625 17:46:57.711859 32898 net.cpp:137] Memory required for data: 7841200
+I0625 17:46:57.711870 32898 layer_factory.hpp:77] Creating layer reshape
+I0625 17:46:57.711879 32898 net.cpp:84] Creating Layer reshape
+I0625 17:46:57.711885 32898 net.cpp:406] reshape <- conv2
+I0625 17:46:57.711894 32898 net.cpp:380] reshape -> conv2_reshaped
+I0625 17:46:57.711956 32898 net.cpp:122] Setting up reshape
+I0625 17:46:57.711966 32898 net.cpp:129] Top shape: 100 392 16 (627200)
+I0625 17:46:57.711971 32898 net.cpp:137] Memory required for data: 10350000
+I0625 17:46:57.711978 32898 layer_factory.hpp:77] Creating layer squash1
+I0625 17:46:57.711990 32898 net.cpp:84] Creating Layer squash1
+I0625 17:46:57.711997 32898 net.cpp:406] squash1 <- conv2_reshaped
+I0625 17:46:57.712005 32898 net.cpp:380] squash1 -> squash1
+I0625 17:46:57.712038 32898 net.cpp:122] Setting up squash1
+I0625 17:46:57.712049 32898 net.cpp:129] Top shape: 100 392 16 (627200)
+I0625 17:46:57.712056 32898 net.cpp:137] Memory required for data: 12858800
+I0625 17:46:57.712064 32898 layer_factory.hpp:77] Creating layer cap_conv_transform
+I0625 17:46:57.712074 32898 net.cpp:84] Creating Layer cap_conv_transform
+I0625 17:46:57.712080 32898 net.cpp:406] cap_conv_transform <- squash1
+I0625 17:46:57.712088 32898 net.cpp:380] cap_conv_transform -> cap_conv_transform
+I0625 17:46:57.713929 32898 net.cpp:122] Setting up cap_conv_transform
+I0625 17:46:57.713946 32898 net.cpp:129] Top shape: 100 1152 32 16 (58982400)
+I0625 17:46:57.713953 32898 net.cpp:137] Memory required for data: 248788400
+I0625 17:46:57.713980 32898 layer_factory.hpp:77] Creating layer cap_conv_routing
+I0625 17:46:57.713994 32898 net.cpp:84] Creating Layer cap_conv_routing
+I0625 17:46:57.714000 32898 net.cpp:406] cap_conv_routing <- cap_conv_transform
+I0625 17:46:57.714010 32898 net.cpp:380] cap_conv_routing -> cap_conv_routing
+I0625 17:46:57.714072 32898 net.cpp:122] Setting up cap_conv_routing
+I0625 17:46:57.714082 32898 net.cpp:129] Top shape: 100 1152 16 (1843200)
+I0625 17:46:57.714088 32898 net.cpp:137] Memory required for data: 256161200
+I0625 17:46:57.714095 32898 layer_factory.hpp:77] Creating layer squash2
+I0625 17:46:57.714104 32898 net.cpp:84] Creating Layer squash2
+I0625 17:46:57.714110 32898 net.cpp:406] squash2 <- cap_conv_routing
+I0625 17:46:57.714118 32898 net.cpp:380] squash2 -> squash2
+I0625 17:46:57.714152 32898 net.cpp:122] Setting up squash2
+I0625 17:46:57.714161 32898 net.cpp:129] Top shape: 100 1152 16 (1843200)
+I0625 17:46:57.714167 32898 net.cpp:137] Memory required for data: 263534000
+I0625 17:46:57.714174 32898 layer_factory.hpp:77] Creating layer cap_conv_transform1
+I0625 17:46:57.714184 32898 net.cpp:84] Creating Layer cap_conv_transform1
+I0625 17:46:57.714190 32898 net.cpp:406] cap_conv_transform1 <- squash2
+I0625 17:46:57.714201 32898 net.cpp:380] cap_conv_transform1 -> cap_conv_transform1
+I0625 17:46:57.721068 32898 net.cpp:122] Setting up cap_conv_transform1
+I0625 17:46:57.721086 32898 net.cpp:129] Top shape: 100 512 288 16 (235929600)
+I0625 17:46:57.721092 32898 net.cpp:137] Memory required for data: 1207252400
+I0625 17:46:57.721104 32898 layer_factory.hpp:77] Creating layer cap_conv_routing1
+I0625 17:46:57.721115 32898 net.cpp:84] Creating Layer cap_conv_routing1
+I0625 17:46:57.721122 32898 net.cpp:406] cap_conv_routing1 <- cap_conv_transform1
+I0625 17:46:57.721134 32898 net.cpp:380] cap_conv_routing1 -> cap_conv_routing1
+I0625 17:46:57.721189 32898 net.cpp:122] Setting up cap_conv_routing1
+I0625 17:46:57.721197 32898 net.cpp:129] Top shape: 100 512 16 (819200)
+I0625 17:46:57.721204 32898 net.cpp:137] Memory required for data: 1210529200
+I0625 17:46:57.721211 32898 layer_factory.hpp:77] Creating layer squash3
+I0625 17:46:57.721220 32898 net.cpp:84] Creating Layer squash3
+I0625 17:46:57.721226 32898 net.cpp:406] squash3 <- cap_conv_routing1
+I0625 17:46:57.721235 32898 net.cpp:380] squash3 -> squash3
+I0625 17:46:57.721269 32898 net.cpp:122] Setting up squash3
+I0625 17:46:57.721278 32898 net.cpp:129] Top shape: 100 512 16 (819200)
+I0625 17:46:57.721284 32898 net.cpp:137] Memory required for data: 1213806000
+I0625 17:46:57.721292 32898 layer_factory.hpp:77] Creating layer cap_conv_transform2
+I0625 17:46:57.721300 32898 net.cpp:84] Creating Layer cap_conv_transform2
+I0625 17:46:57.721307 32898 net.cpp:406] cap_conv_transform2 <- squash3
+I0625 17:46:57.721316 32898 net.cpp:380] cap_conv_transform2 -> cap_conv_transform2
+I0625 17:46:57.721895 32898 net.cpp:122] Setting up cap_conv_transform2
+I0625 17:46:57.721905 32898 net.cpp:129] Top shape: 100 10 512 16 (8192000)
+I0625 17:46:57.721911 32898 net.cpp:137] Memory required for data: 1246574000
+I0625 17:46:57.721920 32898 layer_factory.hpp:77] Creating layer cap_conv_routing2
+I0625 17:46:57.721931 32898 net.cpp:84] Creating Layer cap_conv_routing2
+I0625 17:46:57.721937 32898 net.cpp:406] cap_conv_routing2 <- cap_conv_transform2
+I0625 17:46:57.721946 32898 net.cpp:380] cap_conv_routing2 -> cap_conv_routing2
+I0625 17:46:57.721997 32898 net.cpp:122] Setting up cap_conv_routing2
+I0625 17:46:57.722007 32898 net.cpp:129] Top shape: 100 10 16 (16000)
+I0625 17:46:57.722012 32898 net.cpp:137] Memory required for data: 1246638000
+I0625 17:46:57.722020 32898 layer_factory.hpp:77] Creating layer squash4
+I0625 17:46:57.722028 32898 net.cpp:84] Creating Layer squash4
+I0625 17:46:57.722035 32898 net.cpp:406] squash4 <- cap_conv_routing2
+I0625 17:46:57.722045 32898 net.cpp:380] squash4 -> squash4
+I0625 17:46:57.722079 32898 net.cpp:122] Setting up squash4
+I0625 17:46:57.722088 32898 net.cpp:129] Top shape: 100 10 16 (16000)
+I0625 17:46:57.722097 32898 net.cpp:137] Memory required for data: 1246702000
+I0625 17:46:57.722115 32898 layer_factory.hpp:77] Creating layer squash4_squash4_0_split
+I0625 17:46:57.722126 32898 net.cpp:84] Creating Layer squash4_squash4_0_split
+I0625 17:46:57.722132 32898 net.cpp:406] squash4_squash4_0_split <- squash4
+I0625 17:46:57.722141 32898 net.cpp:380] squash4_squash4_0_split -> squash4_squash4_0_split_0
+I0625 17:46:57.722149 32898 net.cpp:380] squash4_squash4_0_split -> squash4_squash4_0_split_1
+I0625 17:46:57.722182 32898 net.cpp:122] Setting up squash4_squash4_0_split
+I0625 17:46:57.722192 32898 net.cpp:129] Top shape: 100 10 16 (16000)
+I0625 17:46:57.722199 32898 net.cpp:129] Top shape: 100 10 16 (16000)
+I0625 17:46:57.722205 32898 net.cpp:137] Memory required for data: 1246830000
+I0625 17:46:57.722211 32898 layer_factory.hpp:77] Creating layer cap_len
+I0625 17:46:57.722223 32898 net.cpp:84] Creating Layer cap_len
+I0625 17:46:57.722229 32898 net.cpp:406] cap_len <- squash4_squash4_0_split_0
+I0625 17:46:57.722239 32898 net.cpp:380] cap_len -> cap_len
+I0625 17:46:57.722272 32898 net.cpp:122] Setting up cap_len
+I0625 17:46:57.722281 32898 net.cpp:129] Top shape: 100 10 (1000)
+I0625 17:46:57.722287 32898 net.cpp:137] Memory required for data: 1246834000
+I0625 17:46:57.722293 32898 layer_factory.hpp:77] Creating layer accuracy
+I0625 17:46:57.722309 32898 net.cpp:84] Creating Layer accuracy
+I0625 17:46:57.722316 32898 net.cpp:406] accuracy <- cap_len
+I0625 17:46:57.722323 32898 net.cpp:406] accuracy <- label_mnist_1_split_0
+I0625 17:46:57.722332 32898 net.cpp:380] accuracy -> accuracy
+I0625 17:46:57.722344 32898 net.cpp:122] Setting up accuracy
+I0625 17:46:57.722352 32898 net.cpp:129] Top shape: (1)
+I0625 17:46:57.722358 32898 net.cpp:137] Memory required for data: 1246834004
+I0625 17:46:57.722364 32898 layer_factory.hpp:77] Creating layer margin
+I0625 17:46:57.722373 32898 net.cpp:84] Creating Layer margin
+I0625 17:46:57.722379 32898 net.cpp:406] margin <- squash4_squash4_0_split_1
+I0625 17:46:57.722386 32898 net.cpp:406] margin <- label_mnist_1_split_1
+I0625 17:46:57.722394 32898 net.cpp:380] margin -> loss
+I0625 17:46:57.722441 32898 net.cpp:122] Setting up margin
+I0625 17:46:57.722450 32898 net.cpp:129] Top shape: (1)
+I0625 17:46:57.722460 32898 net.cpp:132]     with loss weight 1
+I0625 17:46:57.722471 32898 net.cpp:137] Memory required for data: 1246834008
+I0625 17:46:57.722477 32898 net.cpp:198] margin needs backward computation.
+I0625 17:46:57.722484 32898 net.cpp:200] accuracy does not need backward computation.
+I0625 17:46:57.722491 32898 net.cpp:200] cap_len does not need backward computation.
+I0625 17:46:57.722498 32898 net.cpp:198] squash4_squash4_0_split needs backward computation.
+I0625 17:46:57.722504 32898 net.cpp:198] squash4 needs backward computation.
+I0625 17:46:57.722510 32898 net.cpp:198] cap_conv_routing2 needs backward computation.
+I0625 17:46:57.722517 32898 net.cpp:198] cap_conv_transform2 needs backward computation.
+I0625 17:46:57.722523 32898 net.cpp:198] squash3 needs backward computation.
+I0625 17:46:57.722529 32898 net.cpp:198] cap_conv_routing1 needs backward computation.
+I0625 17:46:57.722537 32898 net.cpp:198] cap_conv_transform1 needs backward computation.
+I0625 17:46:57.722543 32898 net.cpp:198] squash2 needs backward computation.
+I0625 17:46:57.722549 32898 net.cpp:198] cap_conv_routing needs backward computation.
+I0625 17:46:57.722555 32898 net.cpp:198] cap_conv_transform needs backward computation.
+I0625 17:46:57.722561 32898 net.cpp:198] squash1 needs backward computation.
+I0625 17:46:57.722568 32898 net.cpp:198] reshape needs backward computation.
+I0625 17:46:57.722574 32898 net.cpp:198] conv2 needs backward computation.
+I0625 17:46:57.722581 32898 net.cpp:198] relu1 needs backward computation.
+I0625 17:46:57.722587 32898 net.cpp:198] conv1 needs backward computation.
+I0625 17:46:57.722594 32898 net.cpp:200] label_mnist_1_split does not need backward computation.
+I0625 17:46:57.722601 32898 net.cpp:200] mnist does not need backward computation.
+I0625 17:46:57.722606 32898 net.cpp:242] This network produces output accuracy
+I0625 17:46:57.722625 32898 net.cpp:242] This network produces output loss
+I0625 17:46:57.722645 32898 net.cpp:255] Network initialization done.
+I0625 17:46:57.722707 32898 solver.cpp:57] Solver scaffolding done.
+I0625 17:46:57.723217 32898 caffe.cpp:239] Starting Optimization
+I0625 17:46:57.723228 32898 solver.cpp:293] Solving LeNet
+I0625 17:46:57.723234 32898 solver.cpp:294] Learning Rate Policy: inv
+I0625 17:46:57.724058 32898 solver.cpp:351] Iteration 0, Testing net (#0)
+I0625 20:03:09.156311 32903 data_layer.cpp:73] Restarting data prefetching from start.
+I0625 20:08:50.154021 32898 solver.cpp:418]     Test net output #0: accuracy = 0.0741
+I0625 20:08:50.154233 32898 solver.cpp:418]     Test net output #1: loss = 0.725133 (* 1 = 0.725133 loss)
+I0625 20:14:29.078240 32898 solver.cpp:239] Iteration 0 (-1.23464e+20 iter/s, 8850.99s/1 iters), loss = 0.725308
+I0625 20:14:29.078428 32898 solver.cpp:258]     Train net output #0: loss = 0.725308 (* 1 = 0.725308 loss)
+I0625 20:14:29.078454 32898 sgd_solver.cpp:112] Iteration 0, lr = 0.001
+I0625 20:20:07.218107 32898 solver.cpp:239] Iteration 1 (0.00295748 iter/s, 338.126s/1 iters), loss = 0.578761
+I0625 20:20:07.224524 32898 solver.cpp:258]     Train net output #0: loss = 0.578761 (* 1 = 0.578761 loss)
+I0625 20:20:07.224542 32898 sgd_solver.cpp:112] Iteration 1, lr = 0.000999925
+I0625 20:25:45.104189 32898 solver.cpp:239] Iteration 2 (0.00295976 iter/s, 337.866s/1 iters), loss = 0.519692
+I0625 20:25:45.104380 32898 solver.cpp:258]     Train net output #0: loss = 0.519692 (* 1 = 0.519692 loss)
+I0625 20:25:45.104398 32898 sgd_solver.cpp:112] Iteration 2, lr = 0.00099985
+I0625 20:31:22.893528 32898 solver.cpp:239] Iteration 3 (0.00296055 iter/s, 337.775s/1 iters), loss = 0.543835
+I0625 20:31:22.893705 32898 solver.cpp:258]     Train net output #0: loss = 0.543835 (* 1 = 0.543835 loss)
+I0625 20:31:22.893723 32898 sgd_solver.cpp:112] Iteration 3, lr = 0.000999775
+I0625 20:37:00.604238 32898 solver.cpp:239] Iteration 4 (0.00296124 iter/s, 337.697s/1 iters), loss = 0.587637
+I0625 20:37:00.604449 32898 solver.cpp:258]     Train net output #0: loss = 0.587637 (* 1 = 0.587637 loss)
+I0625 20:37:00.604472 32898 sgd_solver.cpp:112] Iteration 4, lr = 0.0009997
+I0625 20:42:38.598420 32898 solver.cpp:239] Iteration 5 (0.00295875 iter/s, 337.98s/1 iters), loss = 0.613125
+I0625 20:42:38.604892 32898 solver.cpp:258]     Train net output #0: loss = 0.613125 (* 1 = 0.613125 loss)
+I0625 20:42:38.604909 32898 sgd_solver.cpp:112] Iteration 5, lr = 0.000999625
+I0625 20:48:16.473317 32898 solver.cpp:239] Iteration 6 (0.00295985 iter/s, 337.854s/1 iters), loss = 0.61164
+I0625 20:48:16.473598 32898 solver.cpp:258]     Train net output #0: loss = 0.61164 (* 1 = 0.61164 loss)
+I0625 20:48:16.473616 32898 sgd_solver.cpp:112] Iteration 6, lr = 0.00099955
+I0625 20:53:54.242983 32898 solver.cpp:239] Iteration 7 (0.00296072 iter/s, 337.755s/1 iters), loss = 0.587634
+I0625 20:53:54.243168 32898 solver.cpp:258]     Train net output #0: loss = 0.587634 (* 1 = 0.587634 loss)
+I0625 20:53:54.243185 32898 sgd_solver.cpp:112] Iteration 7, lr = 0.000999475
+I0625 20:59:32.192379 32898 solver.cpp:239] Iteration 8 (0.00295915 iter/s, 337.935s/1 iters), loss = 0.552334
+I0625 20:59:32.192572 32898 solver.cpp:258]     Train net output #0: loss = 0.552334 (* 1 = 0.552334 loss)
+I0625 20:59:32.192589 32898 sgd_solver.cpp:112] Iteration 8, lr = 0.000999401
+I0625 21:05:10.143353 32898 solver.cpp:239] Iteration 9 (0.00295913 iter/s, 337.937s/1 iters), loss = 0.533976
+I0625 21:05:10.143558 32898 solver.cpp:258]     Train net output #0: loss = 0.533976 (* 1 = 0.533976 loss)
+I0625 21:05:10.143581 32898 sgd_solver.cpp:112] Iteration 9, lr = 0.000999326
+I0625 21:10:48.287251 32898 solver.cpp:239] Iteration 10 (0.00295744 iter/s, 338.13s/1 iters), loss = 0.530785
+I0625 21:10:48.287518 32898 solver.cpp:258]     Train net output #0: loss = 0.530785 (* 1 = 0.530785 loss)
+I0625 21:10:48.287535 32898 sgd_solver.cpp:112] Iteration 10, lr = 0.000999251
+I0625 21:16:29.418738 32898 solver.cpp:239] Iteration 11 (0.00293154 iter/s, 341.117s/1 iters), loss = 0.528882
+I0625 21:16:29.418970 32898 solver.cpp:258]     Train net output #0: loss = 0.528882 (* 1 = 0.528882 loss)
+I0625 21:16:29.418992 32898 sgd_solver.cpp:112] Iteration 11, lr = 0.000999176
+I0625 21:22:07.526501 32898 solver.cpp:239] Iteration 12 (0.00295776 iter/s, 338.094s/1 iters), loss = 0.529359
+I0625 21:22:07.531581 32898 solver.cpp:258]     Train net output #0: loss = 0.529359 (* 1 = 0.529359 loss)
+I0625 21:22:07.531600 32898 sgd_solver.cpp:112] Iteration 12, lr = 0.000999101
+I0625 21:27:45.627079 32898 solver.cpp:239] Iteration 13 (0.00295787 iter/s, 338.082s/1 iters), loss = 0.524981
+I0625 21:27:45.627265 32898 solver.cpp:258]     Train net output #0: loss = 0.524981 (* 1 = 0.524981 loss)
+I0625 21:27:45.627283 32898 sgd_solver.cpp:112] Iteration 13, lr = 0.000999026
+I0625 21:33:23.548633 32898 solver.cpp:239] Iteration 14 (0.00295939 iter/s, 337.908s/1 iters), loss = 0.525169
+I0625 21:33:23.548827 32898 solver.cpp:258]     Train net output #0: loss = 0.525169 (* 1 = 0.525169 loss)
+I0625 21:33:23.548844 32898 sgd_solver.cpp:112] Iteration 14, lr = 0.000998951
+I0625 21:39:01.679780 32898 solver.cpp:239] Iteration 15 (0.00295756 iter/s, 338.117s/1 iters), loss = 0.529123
+I0625 21:39:01.679975 32898 solver.cpp:258]     Train net output #0: loss = 0.529123 (* 1 = 0.529123 loss)
+I0625 21:39:01.679996 32898 sgd_solver.cpp:112] Iteration 15, lr = 0.000998877
+I0625 21:44:42.392305 32898 solver.cpp:239] Iteration 16 (0.00293515 iter/s, 340.698s/1 iters), loss = 0.527694
+I0625 21:44:42.392541 32898 solver.cpp:258]     Train net output #0: loss = 0.527694 (* 1 = 0.527694 loss)
+I0625 21:44:42.392560 32898 sgd_solver.cpp:112] Iteration 16, lr = 0.000998802
+I0625 21:50:24.645606 32898 solver.cpp:239] Iteration 17 (0.00292193 iter/s, 342.239s/1 iters), loss = 0.52586
+I0625 21:50:24.646528 32898 solver.cpp:258]     Train net output #0: loss = 0.52586 (* 1 = 0.52586 loss)
+I0625 21:50:24.646548 32898 sgd_solver.cpp:112] Iteration 17, lr = 0.000998727
+I0625 21:56:07.036376 32898 solver.cpp:239] Iteration 18 (0.00292077 iter/s, 342.376s/1 iters), loss = 0.539334
+I0625 21:56:07.036607 32898 solver.cpp:258]     Train net output #0: loss = 0.539334 (* 1 = 0.539334 loss)
+I0625 21:56:07.036624 32898 sgd_solver.cpp:112] Iteration 18, lr = 0.000998652
+I0625 22:01:49.746453 32898 solver.cpp:239] Iteration 19 (0.00291804 iter/s, 342.696s/1 iters), loss = 0.545158
+I0625 22:01:49.746690 32898 solver.cpp:258]     Train net output #0: loss = 0.545158 (* 1 = 0.545158 loss)
+I0625 22:01:49.746707 32898 sgd_solver.cpp:112] Iteration 19, lr = 0.000998577
+I0625 22:07:30.799449 32898 solver.cpp:239] Iteration 20 (0.00293222 iter/s, 341.039s/1 iters), loss = 0.560285
+I0625 22:07:30.800544 32898 solver.cpp:258]     Train net output #0: loss = 0.560285 (* 1 = 0.560285 loss)
+I0625 22:07:30.800560 32898 sgd_solver.cpp:112] Iteration 20, lr = 0.000998503
+I0625 22:13:12.343571 32898 solver.cpp:239] Iteration 21 (0.00292801 iter/s, 341.529s/1 iters), loss = 0.550157
+I0625 22:13:12.343804 32898 solver.cpp:258]     Train net output #0: loss = 0.550157 (* 1 = 0.550157 loss)
+I0625 22:13:12.343825 32898 sgd_solver.cpp:112] Iteration 21, lr = 0.000998428
+I0625 22:18:58.192001 32898 solver.cpp:239] Iteration 22 (0.00289156 iter/s, 345.834s/1 iters), loss = 0.551398
+I0625 22:18:58.192225 32898 solver.cpp:258]     Train net output #0: loss = 0.551398 (* 1 = 0.551398 loss)
+I0625 22:18:58.192243 32898 sgd_solver.cpp:112] Iteration 22, lr = 0.000998353
+I0625 22:24:39.857676 32898 solver.cpp:239] Iteration 23 (0.00292696 iter/s, 341.651s/1 iters), loss = 0.555411
+I0625 22:24:39.858522 32898 solver.cpp:258]     Train net output #0: loss = 0.555411 (* 1 = 0.555411 loss)
+I0625 22:24:39.858538 32898 sgd_solver.cpp:112] Iteration 23, lr = 0.000998278
+I0625 22:30:21.519008 32898 solver.cpp:239] Iteration 24 (0.002927 iter/s, 341.646s/1 iters), loss = 0.542079
+I0625 22:30:21.519516 32898 solver.cpp:258]     Train net output #0: loss = 0.542079 (* 1 = 0.542079 loss)
+I0625 22:30:21.519537 32898 sgd_solver.cpp:112] Iteration 24, lr = 0.000998204
+I0625 22:36:03.917320 32898 solver.cpp:239] Iteration 25 (0.0029207 iter/s, 342.384s/1 iters), loss = 0.538673
+I0625 22:36:03.917632 32898 solver.cpp:258]     Train net output #0: loss = 0.538673 (* 1 = 0.538673 loss)
+I0625 22:36:03.917650 32898 sgd_solver.cpp:112] Iteration 25, lr = 0.000998129
+I0625 22:41:45.926498 32898 solver.cpp:239] Iteration 26 (0.00292402 iter/s, 341.995s/1 iters), loss = 0.529637
+I0625 22:41:45.927541 32898 solver.cpp:258]     Train net output #0: loss = 0.529637 (* 1 = 0.529637 loss)
+I0625 22:41:45.927557 32898 sgd_solver.cpp:112] Iteration 26, lr = 0.000998055
+I0625 22:47:27.822461 32898 solver.cpp:239] Iteration 27 (0.002925 iter/s, 341.881s/1 iters), loss = 0.529829
+I0625 22:47:27.825544 32898 solver.cpp:258]     Train net output #0: loss = 0.529829 (* 1 = 0.529829 loss)
+I0625 22:47:27.825561 32898 sgd_solver.cpp:112] Iteration 27, lr = 0.00099798
+I0625 22:53:09.727849 32898 solver.cpp:239] Iteration 28 (0.00292493 iter/s, 341.888s/1 iters), loss = 0.538912
+I0625 22:53:09.728529 32898 solver.cpp:258]     Train net output #0: loss = 0.538912 (* 1 = 0.538912 loss)
+I0625 22:53:09.728546 32898 sgd_solver.cpp:112] Iteration 28, lr = 0.000997905
+I0625 22:58:51.635068 32898 solver.cpp:239] Iteration 29 (0.0029249 iter/s, 341.892s/1 iters), loss = 0.530753
+I0625 22:58:51.635514 32898 solver.cpp:258]     Train net output #0: loss = 0.530753 (* 1 = 0.530753 loss)
+I0625 22:58:51.635532 32898 sgd_solver.cpp:112] Iteration 29, lr = 0.000997831
+I0625 23:04:33.797497 32898 solver.cpp:239] Iteration 30 (0.00292271 iter/s, 342.148s/1 iters), loss = 0.530396
+I0625 23:04:33.798526 32898 solver.cpp:258]     Train net output #0: loss = 0.530396 (* 1 = 0.530396 loss)
+I0625 23:04:33.798542 32898 sgd_solver.cpp:112] Iteration 30, lr = 0.000997756
+I0625 23:10:20.749979 32898 solver.cpp:239] Iteration 31 (0.00288237 iter/s, 346.937s/1 iters), loss = 0.533242
+I0625 23:10:20.750528 32898 solver.cpp:258]     Train net output #0: loss = 0.533242 (* 1 = 0.533242 loss)
+I0625 23:10:20.750547 32898 sgd_solver.cpp:112] Iteration 31, lr = 0.000997681
+I0625 23:16:02.083375 32898 solver.cpp:239] Iteration 32 (0.00292981 iter/s, 341.319s/1 iters), loss = 0.532796
+I0625 23:16:02.083606 32898 solver.cpp:258]     Train net output #0: loss = 0.532796 (* 1 = 0.532796 loss)
+I0625 23:16:02.083624 32898 sgd_solver.cpp:112] Iteration 32, lr = 0.000997607
+I0625 23:21:44.816838 32898 solver.cpp:239] Iteration 33 (0.00291784 iter/s, 342.719s/1 iters), loss = 0.531463
+I0625 23:21:44.817533 32898 solver.cpp:258]     Train net output #0: loss = 0.531463 (* 1 = 0.531463 loss)
+I0625 23:21:44.817551 32898 sgd_solver.cpp:112] Iteration 33, lr = 0.000997532
+I0625 23:27:26.807672 32898 solver.cpp:239] Iteration 34 (0.00292418 iter/s, 341.976s/1 iters), loss = 0.532269
+I0625 23:27:26.808542 32898 solver.cpp:258]     Train net output #0: loss = 0.532269 (* 1 = 0.532269 loss)
+I0625 23:27:26.808559 32898 sgd_solver.cpp:112] Iteration 34, lr = 0.000997458
+I0625 23:33:09.214995 32898 solver.cpp:239] Iteration 35 (0.00292063 iter/s, 342.392s/1 iters), loss = 0.52847
+I0625 23:33:09.215528 32898 solver.cpp:258]     Train net output #0: loss = 0.52847 (* 1 = 0.52847 loss)
+I0625 23:33:09.215544 32898 sgd_solver.cpp:112] Iteration 35, lr = 0.000997383
+I0625 23:38:51.079541 32898 solver.cpp:239] Iteration 36 (0.00292526 iter/s, 341.85s/1 iters), loss = 0.531017
+I0625 23:38:51.079788 32898 solver.cpp:258]     Train net output #0: loss = 0.531017 (* 1 = 0.531017 loss)
+I0625 23:38:51.079805 32898 sgd_solver.cpp:112] Iteration 36, lr = 0.000997309
+I0625 23:44:32.936638 32898 solver.cpp:239] Iteration 37 (0.00292532 iter/s, 341.843s/1 iters), loss = 0.534104
+I0625 23:44:32.937526 32898 solver.cpp:258]     Train net output #0: loss = 0.534104 (* 1 = 0.534104 loss)
+I0625 23:44:32.937543 32898 sgd_solver.cpp:112] Iteration 37, lr = 0.000997234
+I0625 23:50:15.762032 32898 solver.cpp:239] Iteration 38 (0.00291707 iter/s, 342.81s/1 iters), loss = 0.532378
+I0625 23:50:15.762521 32898 solver.cpp:258]     Train net output #0: loss = 0.532378 (* 1 = 0.532378 loss)
+I0625 23:50:15.762543 32898 sgd_solver.cpp:112] Iteration 38, lr = 0.00099716
+I0625 23:55:57.460542 32898 solver.cpp:239] Iteration 39 (0.00292668 iter/s, 341.684s/1 iters), loss = 0.538976
+I0625 23:55:57.460749 32898 solver.cpp:258]     Train net output #0: loss = 0.538976 (* 1 = 0.538976 loss)
+I0625 23:55:57.460767 32898 sgd_solver.cpp:112] Iteration 39, lr = 0.000997085
+I0626 00:01:39.002147 32898 solver.cpp:239] Iteration 40 (0.00292802 iter/s, 341.527s/1 iters), loss = 0.539301
+I0626 00:01:39.002364 32898 solver.cpp:258]     Train net output #0: loss = 0.539301 (* 1 = 0.539301 loss)
+I0626 00:01:39.002382 32898 sgd_solver.cpp:112] Iteration 40, lr = 0.000997011
+I0626 00:07:20.757848 32898 solver.cpp:239] Iteration 41 (0.00292619 iter/s, 341.741s/1 iters), loss = 0.541001
+I0626 00:07:20.758057 32898 solver.cpp:258]     Train net output #0: loss = 0.541001 (* 1 = 0.541001 loss)
+I0626 00:07:20.758075 32898 sgd_solver.cpp:112] Iteration 41, lr = 0.000996936
+I0626 00:13:03.016742 32898 solver.cpp:239] Iteration 42 (0.00292189 iter/s, 342.245s/1 iters), loss = 0.538604
+I0626 00:13:03.016971 32898 solver.cpp:258]     Train net output #0: loss = 0.538604 (* 1 = 0.538604 loss)
+I0626 00:13:03.016989 32898 sgd_solver.cpp:112] Iteration 42, lr = 0.000996862
+I0626 00:18:45.735853 32898 solver.cpp:239] Iteration 43 (0.00291796 iter/s, 342.705s/1 iters), loss = 0.537176
+I0626 00:18:45.736094 32898 solver.cpp:258]     Train net output #0: loss = 0.537176 (* 1 = 0.537176 loss)
+I0626 00:18:45.736111 32898 sgd_solver.cpp:112] Iteration 43, lr = 0.000996787
+I0626 00:24:28.485993 32898 solver.cpp:239] Iteration 44 (0.0029177 iter/s, 342.736s/1 iters), loss = 0.531871
+I0626 00:24:28.486196 32898 solver.cpp:258]     Train net output #0: loss = 0.531871 (* 1 = 0.531871 loss)
+I0626 00:24:28.486213 32898 sgd_solver.cpp:112] Iteration 44, lr = 0.000996713
+I0626 00:30:09.529798 32898 solver.cpp:239] Iteration 45 (0.0029323 iter/s, 341.029s/1 iters), loss = 0.529501
+I0626 00:30:09.530017 32898 solver.cpp:258]     Train net output #0: loss = 0.529501 (* 1 = 0.529501 loss)
+I0626 00:30:09.530035 32898 sgd_solver.cpp:112] Iteration 45, lr = 0.000996638
+I0626 00:35:51.181262 32898 solver.cpp:239] Iteration 46 (0.00292708 iter/s, 341.637s/1 iters), loss = 0.529191
+I0626 00:35:51.181497 32898 solver.cpp:258]     Train net output #0: loss = 0.529191 (* 1 = 0.529191 loss)
+I0626 00:35:51.181515 32898 sgd_solver.cpp:112] Iteration 46, lr = 0.000996564

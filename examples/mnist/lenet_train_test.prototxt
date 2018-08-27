@@ -1,0 +1,327 @@
+name: "LeNet"
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_train_lmdb"
+    batch_size: 128
+    backend: LMDB
+  }
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "examples/mnist/mnist_test_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 9
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 9
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "reshape"
+  type: "CapsuleReshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  capsule_reshape_param {
+    capsule_dim: 8
+  }
+}
+
+
+#  layer {
+#    name: "reshape"
+#    type: "Reshape"
+#    bottom: "conv2"
+#    top: "conv2_reshaped"
+#    reshape_param {
+#      shape {
+#        dim: 0  # copy the dimension from below
+#        dim: -1
+#        dim: 8 # infer it from the other dimensions
+#      }
+#    }
+#  }
+
+layer {
+  name: "squash1"
+  type: "Squash"
+  bottom: "conv2_reshaped"
+  top: "squash1"
+  squash_param {
+    capsule_dim: 8
+  }
+}
+
+layer {
+  name: "capsule"
+  type: "Cap"
+  bottom: "squash1"
+  top: "capsule"
+  cap_param {
+    input_capsule_dim: 8
+    output_capsule_dim: 16
+    output_capsule_num: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "squash2"
+  type: "Squash"
+  bottom: "capsule"
+  top: "squash2"
+  squash_param {
+    capsule_dim: 16
+  }
+}
+
+layer {
+  name: "cap_len"
+  type: "CapsuleLen"
+  bottom: "squash2"
+  top: "cap_len"
+  include {
+    phase: TEST
+  }
+  capsule_len_param {
+    num_class: 10
+  }
+}
+
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "cap_len"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+
+layer {
+  name: "margin"
+  type: "MarginLoss"
+  bottom: "squash2"
+  bottom: "label"
+  top: "loss"
+  margin_param {
+    num_class: 10
+    m_upper_bound: 0.9
+    m_lower_bound: 0.1
+    lambda: 0.5
+  }
+}
+
+layer {
+  name:"mask"
+  type: "CapsuleMask"
+  bottom: "squash2"
+  #bottom: "capsule"
+  top: "masked_capsule"
+  capsule_mask_param {
+    class_num: 10
+  }
+}
+
+layer {
+  name: "decode"
+  type: "InnerProduct"
+  bottom: "masked_capsule"
+  top: "decode"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 512
+    weight_filler {
+      type: "gaussian"
+      std: 1
+      sparse: 15
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+#layer {
+#  name: "relu3"
+#  type: "ReLU"
+#  bottom: "decode"
+#  top: "decode"
+#}
+layer {
+  name: "sigmoid2"
+  type: "Sigmoid"
+  bottom: "decode"
+  top: "decode"
+}
+
+layer {
+  name: "decode1"
+  type: "InnerProduct"
+  bottom: "decode"
+  top: "decode1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1024
+    weight_filler {
+      type: "gaussian"
+      std: 1
+      sparse: 15
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+#layer {
+#  name: "relu4"
+#  type: "ReLU"
+#  bottom: "decode1"
+#  top: "decode1"
+#}
+layer {
+  name: "sigmoid1"
+  type: "Sigmoid"
+  bottom: "decode1"
+  top: "decode1"
+}
+
+layer {
+  name: "decode2"
+  type: "InnerProduct"
+  bottom: "decode1"
+  top: "decode2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 784
+    #weight_filler {
+    #  type: "xavier"
+    #}
+    weight_filler {
+      type: "gaussian"
+      std: 1
+      sparse: 15
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "sigmoid"
+  type: "Sigmoid"
+  bottom: "decode2"
+  top: "sigmoid"
+}
+layer {
+  name: "flatdata"
+  type: "Flatten"
+  bottom: "data"
+  top: "flatdata"
+}
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "sigmoid"
+  bottom: "flatdata"
+  top: "loss1"
+  loss_weight: 0.0005
+  #loss_weight: 0.392
+}

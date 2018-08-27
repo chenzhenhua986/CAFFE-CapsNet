@@ -1,0 +1,77 @@
+#include <vector>
+
+#include "caffe/layers/margin_loss_layer.hpp"
+#include "caffe/util/math_functions.hpp"
+
+namespace caffe {
+
+template <typename Dtype>
+void MarginLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+    const vector<Blob<Dtype>*>& top) {
+  const Dtype* bottom_data = bottom[0]->gpu_data();
+  const Dtype* label = bottom[1]->gpu_data();
+  
+  // Calculate norm for each capsule
+  //Dtype* lens = cap_lens_.mutable_gpu_data();
+  Dtype* tmp = tmp_.mutable_gpu_data();
+  Dtype loss = Dtype(0);
+  caffe_gpu_powx(M_ * num_class_ * dim_, bottom_data, Dtype(2), tmp);
+  LOG(INFO) << "after label : ";
+  int l, T;
+  for(int i = 0; i < M_; ++i) {
+    l = static_cast<int>(label[i]);
+    LOG(INFO) << "before label : ";
+    for(int j = 0; j < num_class_; ++j) {
+      Dtype cap_len;
+      caffe_gpu_asum(dim_, tmp + i * num_class_ * dim_ + j * dim_, &cap_len);
+      //std::sqrt(caffe_gpu_asum(dim_, tmp + i * num_class_ * dim_ + j * dim_, &cap_len));
+      T = (l == j ? 1 : 0);
+      loss += T * pow(std::max(Dtype(0), m_upper_bound_ - sqrt(cap_len)), 2) + 
+	lambda_ * (1 - T) * pow(std::max(Dtype(0), sqrt(cap_len) - m_lower_bound_), 2); 
+    }
+  }
+  //LOG(INFO) << "margin loss : " << loss;
+  top[0]->mutable_gpu_data()[0] = (Dtype)loss / (Dtype)M_;
+}
+
+template <typename Dtype>
+void MarginLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
+    const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+  if (propagate_down[1]) {
+    LOG(FATAL) << this->type()
+               << " Layer cannot backpropagate to label inputs.";
+  }
+  if (propagate_down[0]) {
+    Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
+    const Dtype* bottom_data = bottom[0]->gpu_data();
+    const Dtype* label = bottom[1]->gpu_data();
+    //const Dtype* lens = cap_lens_.gpu_data();
+    Dtype* tmp = tmp_.mutable_gpu_data();
+    caffe_gpu_powx(M_ * num_class_ * dim_, bottom_data, Dtype(2), tmp);
+    int l, T;
+    for (int i = 0; i < M_; ++i) {
+      l = static_cast<int>(label[i]);
+      for(int j = 0; j < num_class_; ++j) {
+        Dtype cap_len;
+        caffe_gpu_asum(dim_, tmp + i * num_class_ * dim_ + j * dim_, &cap_len);
+	Dtype grad_scalar = Dtype(0);
+        T = (l == j ? 1 : 0);
+	
+	if(T == 1 && sqrt(cap_len) < m_upper_bound_) {
+	  grad_scalar = (-2) * (m_upper_bound_ - sqrt(cap_len)) / sqrt(cap_len);
+	} 
+	if(T == 0 && sqrt(cap_len) > m_lower_bound_) {
+	  grad_scalar = lambda_ * 2 * (sqrt(cap_len) - m_lower_bound_) / sqrt(cap_len);
+	}
+	caffe_gpu_scale(dim_, grad_scalar, bottom_data + i * num_class_ * dim_ + j * dim_, bottom_diff + i * num_class_ * dim_ + j * dim_); 
+        //for(int k = 0; k < dim_; ++k) {
+	//  bottom_diff[i * num_class_ * dim_ + j * dim_ + k] = grad_scalar * bottom_data[i * num_class_ * dim_ + j * dim_ + k] / sqrt(cap_len); 
+	//}
+      }
+    }
+  }
+}
+
+INSTANTIATE_LAYER_GPU_FUNCS(MarginLossLayer);
+
+}  // namespace caffe
