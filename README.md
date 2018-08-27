@@ -43,3 +43,8 @@ Please cite Caffe in your publications if it helps your research:
       Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
       Year = {2014}
     }
+
+# CAFFE-CapsNet
+This repository is for the paper "Generalized Capsule Networks with Trainable Routing Procedure". Basically we make the rouing prodedure become part of the training process. Currently, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. G-CapsNet is tested on MNIST and achieve comparible performance as normal CapsNet.
+
+## Guidline
