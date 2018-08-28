@@ -65,7 +65,7 @@ Please send email to chen478@iu.edu for questions.
 ## Citation
 
     @article{G-CapsNet,
-      Author = {Chen, Zhenhua and David, Crandall},
+      Author = {Chen, Zhenhua and Crandall, David},
       Journal = {https://arxiv.org/abs/1808.08692v1},
       Title = {Generalized Capsule Networks with Trainable Routing Procedure},
       Year = {2018}
