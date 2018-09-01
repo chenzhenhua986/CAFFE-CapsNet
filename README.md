@@ -60,6 +60,11 @@ To Train a "convolutioal" version of G-CapsNet, run
 ```
 sh examples/mnist/train_g_conv_capsule.sh 
 ```
+To Train a baseline (Please read the paper for more details), run
+```
+sh examples/mnist/train_baseline.sh 
+```
+
 Please send email to chen478@iu.edu for questions.
 
 ## Citation
