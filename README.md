@@ -51,18 +51,28 @@ G-CapsNet makes the rouing prodedure become part of the training process, it sup
 
 G-CapsNet is tested on MNIST and achieves comparible performance as normal CapsNet.
 
-## Guidline
-To Train a "full-connected" version of G-CapsNet, run
+## Guidline on MNIST
+To train a "full-connected" version of G-CapsNet, run
 ```
 sh examples/mnist/train_full_connected_capsule.sh
 ```
-To Train a "convolutioal" version of G-CapsNet, run
+To train a "convolutioal" version of G-CapsNet, run
 ```
 sh examples/mnist/train_g_conv_capsule.sh 
 ```
-To Train a baseline (Please read the paper for more details), run
+To train a baseline (Please read the paper for more details), run
 ```
 sh examples/mnist/train_baseline.sh 
+```
+
+## Guidline on CIFAR10
+To train a "full-connected" version of G-capsNet, run
+```
+sh examples/cifar10/train_full_connected.sh
+```
+To train a baseline (Please read the paper for more details), run
+```
+sh examples/cifar10/train_baseline.sh
 ```
 
 Please send email to chen478@iu.edu for questions.
