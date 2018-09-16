@@ -78,7 +78,6 @@ layer {
   name: "cap_routing"
   type: "CapsuleRouting"
   bottom: "cap_transform"
-  #bottom: "squash2"
   top: "cap_routing"
   capsule_routing_param {
     input_capsule_num: 1152
