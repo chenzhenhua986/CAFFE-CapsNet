@@ -145,7 +145,33 @@ layer {
   }
 }
 ```
+To convert normal activations to 'capsules' across feature maps, please use 'CapsuleReshape' layer. Othewise, use 'Reshape' layer.
+```
+layer {
+  name: "reshape"
+  type: "CapsuleReshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  capsule_reshape_param {
+    capsule_dim: 8
+  }
+}
 
+
+layer {
+  name: "reshape"
+  type: "Reshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  reshape_param {
+    shape {
+      dim: 0  
+      dim: -1
+      dim: 8 
+    }
+  }
+}
+```
 
 ## Training on MNIST
 To train a "full-connected" version of G-CapsNet, run
