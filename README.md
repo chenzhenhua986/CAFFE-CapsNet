@@ -51,7 +51,49 @@ G-CapsNet makes the rouing prodedure become part of the training process, it sup
 
 G-CapsNet is tested on MNIST and achieves comparible performance as normal CapsNet.
 
-## Guidline on MNIST
+## Guidline
+To add a capsule layer, you need to add one capsule transformaton layer and one capsule routing layer,
+
+```
+layer {
+  name: "cap_transform"
+  type: "CapsuleTransform"
+  bottom: "squash1"
+  top: "cap_transform"
+  capsule_transform_param {
+    input_capsule_dim: 8
+    output_capsule_dim: 16
+    output_capsule_num: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "cap_routing"
+  type: "CapsuleRouting"
+  bottom: "cap_transform"
+  #bottom: "squash2"
+  top: "cap_routing"
+  capsule_routing_param {
+    input_capsule_num: 1152
+    output_capsule_dim: 16
+    output_capsule_num: 10
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+```
+
+
+
+## Training on MNIST
 To train a "full-connected" version of G-CapsNet, run
 ```
 sh examples/mnist/train_full_connected_capsule.sh
@@ -65,7 +107,7 @@ To train a baseline (Please read the paper for more details), run
 sh examples/mnist/train_baseline.sh 
 ```
 
-## Guidline on CIFAR10
+## Training on CIFAR10
 To train a "full-connected" version of G-capsNet, run
 ```
 sh examples/cifar10/train_full_connected.sh
