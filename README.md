@@ -52,7 +52,7 @@ G-CapsNet makes the rouing prodedure become part of the training process, it sup
 G-CapsNet is tested on MNIST and achieves comparible performance as normal CapsNet.
 
 ## Guidline
-To add a capsule layer, you need to add one capsule transformaton layer and one capsule routing layer,
+To add a full-connected capsule layer, you need to add one 'CapsuleTransform' layer and one 'CapsuleRouting' layer,
 
 ```
 layer {
@@ -89,7 +89,62 @@ layer {
   }
 }
 ```
+To add a convolutional capsule layer, you need to add one 'CapsuleConvTransform' layer and one 'CapsuleConvRouting' layer,
+```
+layer {
+  name: "cap_conv_transform"
+  type: "CapsuleConvTransform"
+  bottom: "squash1"
+  top: "cap_conv_transform"
+  capsule_conv_transform_param {
+    input_h: 14
+    input_w: 14
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    input_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
 
+layer {
+  name: "cap_conv_routing"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform"
+  top: "cap_conv_routing"
+  capsule_conv_routing_param {
+    input_h: 14
+    input_w: 14
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+```
 
 
 ## Training on MNIST
