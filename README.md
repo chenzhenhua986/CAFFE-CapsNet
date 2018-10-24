@@ -197,6 +197,12 @@ To train a baseline (Please read the paper for more details), run
 sh examples/cifar10/train_baseline.sh
 ```
 
+To train a multi_layer CapsNet, run
+```
+sh examples/cifar10/train_multi_capsule_layer.sh
+```
+
+
 Please send email to chen478@iu.edu for questions.
 
 
