@@ -45,7 +45,7 @@ Please cite Caffe in your publications if it helps your research:
     }
 
 # CAFFE-CapsNet
-This repository is for the paper "Generalized Capsule Networks with Trainable Routing Procedure". 
+This repository is for the paper [Generalized Capsule Networks with Trainable Routing Procedure](https://github.com/chenzhenhua986/CAFFE-CapsNet/blob/master/Generalized%20Capsule%20Networks%20with%20Trainable%20Routing%20Procedure.pdf). 
 
 G-CapsNet makes the rouing prodedure become part of the training process, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. 
 
@@ -203,7 +203,7 @@ sh examples/cifar10/train_multi_capsule_layer.sh
 ```
 
 
-Please send email to chenzhenhua986@gmail.com for questions.
+Please send email to chen478@iu.edu for questions.
 
 
 
