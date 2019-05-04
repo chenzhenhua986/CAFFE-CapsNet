@@ -396,17 +396,20 @@ message LayerParameter {
   optional ImageDataParameter image_data_param = 115;
   optional InfogainLossParameter infogain_loss_param = 116;
   optional InnerProductParameter inner_product_param = 117;
-  optional CapParameter cap_param = 500;
-  optional MarginParameter margin_param = 501;
-  optional SquashParameter squash_param = 502;
-  optional CapsuleTransformParameter capsule_transform_param = 503;
-  optional CapsuleRoutingParameter capsule_routing_param = 504;
-  optional CapsuleMaskParameter capsule_mask_param = 505;
-  optional CapsuleReshapeParameter capsule_reshape_param = 506;
-  optional CapsuleLenParameter capsule_len_param = 507;
-  optional CapsuleConvTransformParameter capsule_conv_transform_param = 508;
-  optional CapsuleConvRoutingParameter capsule_conv_routing_param = 509;
-  optional CapsuleReluParameter capsule_relu_param = 510;
+  optional CapParameter cap_param = 147;
+  optional MarginParameter margin_param = 148;
+  optional SquashParameter squash_param = 149;
+  optional CapsuleTransformParameter capsule_transform_param = 150;
+  optional CapsuleRoutingParameter capsule_routing_param = 151;
+  optional CapsuleMaskParameter capsule_mask_param = 152;
+  optional CapsuleReshapeParameter capsule_reshape_param = 153;
+  optional CapsuleLenParameter capsule_len_param = 154;
+  optional CapsuleConvTransformParameter capsule_conv_transform_param = 155;
+  optional CapsuleConvRoutingParameter capsule_conv_routing_param = 156;
+  optional CapsuleReluParameter capsule_relu_param = 157;
+  optional RandVecParameter rand_vec_param = 158;
+  optional CapsuleProductParameter capsule_product_param = 159;
+  optional DynamicRoutingParameter dr_param = 160;
   optional InputParameter input_param = 143;
   optional LogParameter log_param = 134;
   optional LRNParameter lrn_param = 118;
@@ -920,6 +923,13 @@ message CapsuleRoutingParameter {
   optional uint32 output_capsule_num = 4; 
 }
 
+message DynamicRoutingParameter {
+  optional uint32 routing_num = 1; 
+  optional uint32 input_capsule_num = 2; 
+  optional uint32 output_capsule_dim = 3; 
+  optional uint32 output_capsule_num = 4; 
+}
+
 message CapsuleMaskParameter {
   optional uint32 class_num = 1; 
 }
@@ -937,6 +947,14 @@ message CapsuleReluParameter {
   optional float thre = 2;
 }
 
+message CapsuleProductParameter {
+  optional uint32 dim = 1;
+  optional uint32 num = 2;
+  optional bool bias_term = 3 [default = true]; // whether to have bias terms
+  optional FillerParameter weight_filler = 4; // The filler for the weight
+  optional FillerParameter bias_filler = 5; // The filler for the bias
+}
+
 message MarginParameter {
   optional uint32 num_class = 1;
   // upper bound of m 
@@ -946,6 +964,15 @@ message MarginParameter {
   // lambda
   optional float lambda = 4;
   optional int32 axis = 5 [default = 1];
+}
+
+message RandVecParameter {
+  optional uint32 batch_size = 1 [default = 1];
+  optional uint32 dim = 2;
+  optional float lower = 3;
+  optional float upper = 4;
+  optional uint32 height = 5;
+  optional uint32 width = 6;
 }
 
 message SquashParameter {
@@ -1407,6 +1434,17 @@ message V1LayerParameter {
   optional ImageDataParameter image_data_param = 15;
   optional InfogainLossParameter infogain_loss_param = 16;
   optional InnerProductParameter inner_product_param = 17;
+  optional CapParameter cap_param = 70;
+  optional MarginParameter margin_param = 71;
+  optional SquashParameter squash_param = 72;
+  optional CapsuleTransformParameter capsule_transform_param = 73;
+  optional CapsuleRoutingParameter capsule_routing_param = 74;
+  optional CapsuleMaskParameter capsule_mask_param = 75;
+  optional CapsuleReshapeParameter capsule_reshape_param = 76;
+  optional CapsuleLenParameter capsule_len_param = 77;
+  optional CapsuleConvTransformParameter capsule_conv_transform_param = 78;
+  optional CapsuleConvRoutingParameter capsule_conv_routing_param = 79;
+  optional CapsuleReluParameter capsule_relu_param = 80;
   optional LRNParameter lrn_param = 18;
   optional MemoryDataParameter memory_data_param = 22;
   optional MVNParameter mvn_param = 34;
