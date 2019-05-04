@@ -186,6 +186,10 @@ To train a baseline (Please read the paper for more details), run
 ```
 sh examples/mnist/train_baseline.sh 
 ```
+To train the CapsNet with dynamic routing in the orignal paper, run
+```
+sh examples/mnist/train_dr.sh 
+```
 
 ## Training on CIFAR10
 To train a "full-connected" version of G-capsNet, run
@@ -201,7 +205,10 @@ To train a multi_layer CapsNet, run
 ```
 sh examples/cifar10/train_multi_capsule_layer.sh
 ```
-
+To train the CapsNet with dynamic routing in the orignal paper, run
+```
+sh examples/cifar10/train_dr.sh 
+```
 
 Please send email to chen478@iu.edu for questions.
 
