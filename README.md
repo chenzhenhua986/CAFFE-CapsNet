@@ -210,6 +210,11 @@ To train the CapsNet with dynamic routing in the orignal paper, run
 sh examples/cifar10/train_dr.sh 
 ```
 
+## Try capsule deconvolutional layer
+```
+sh examples/mnist/train_capsule_deconv.sh
+```
+
 Please send email to chen478@iu.edu for questions.
 
 
