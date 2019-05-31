@@ -410,6 +410,8 @@ message LayerParameter {
   optional RandVecParameter rand_vec_param = 158;
   optional CapsuleProductParameter capsule_product_param = 159;
   optional DynamicRoutingParameter dr_param = 160;
+  optional CapsuleDeconvTransformParameter capsule_deconv_transform_param = 161;
+  optional CapsuleDeconvRoutingParameter capsule_deconv_routing_param = 162;
   optional InputParameter input_param = 143;
   optional LogParameter log_param = 134;
   optional LRNParameter lrn_param = 118;
@@ -902,6 +904,22 @@ message CapsuleConvTransformParameter {
   optional uint32 input_w = 12; 
 }
 
+message CapsuleDeconvTransformParameter {
+  optional bool bias_term = 1 [default = true]; // whether to have bias terms
+  optional FillerParameter weight_filler = 2; // The filler for the weight
+  optional FillerParameter bias_filler = 3; // The filler for the bias
+
+  optional uint32 stride = 4; 
+  optional uint32 kh = 5; 
+  optional uint32 kw = 6; 
+  optional uint32 input_capsule_num = 7; 
+  optional BlobShape input_capsule_shape = 8;
+  optional uint32 output_capsule_num = 9; 
+  optional BlobShape output_capsule_shape = 10;
+  optional uint32 input_h = 11; 
+  optional uint32 input_w = 12; 
+}
+
 message CapsuleConvRoutingParameter {
   optional FillerParameter weight_filler = 1; // The filler for the weight
 
@@ -913,6 +931,20 @@ message CapsuleConvRoutingParameter {
   optional BlobShape output_capsule_shape = 7;
   optional uint32 input_h = 8; 
   optional uint32 input_w = 9; 
+}
+
+message CapsuleDeconvRoutingParameter {
+  optional FillerParameter weight_filler = 1; // The filler for the weight
+
+  optional uint32 stride = 2; 
+  optional uint32 kh = 3; 
+  optional uint32 kw = 4; 
+  optional uint32 input_capsule_num = 5; 
+  optional uint32 output_capsule_num = 6; 
+  //optional BlobShape output_capsule_shape = 7;
+  optional uint32 input_h = 8; 
+  optional uint32 input_w = 9; 
+  optional BlobShape input_capsule_shape = 10;
 }
 
 message CapsuleRoutingParameter {
@@ -1445,6 +1477,8 @@ message V1LayerParameter {
   optional CapsuleConvTransformParameter capsule_conv_transform_param = 78;
   optional CapsuleConvRoutingParameter capsule_conv_routing_param = 79;
   optional CapsuleReluParameter capsule_relu_param = 80;
+  optional CapsuleDeconvTransformParameter capsule_deconv_transform_param = 81;
+  optional CapsuleDeconvRoutingParameter capsule_deconv_routing_param = 82;
   optional LRNParameter lrn_param = 18;
   optional MemoryDataParameter memory_data_param = 22;
   optional MVNParameter mvn_param = 34;
