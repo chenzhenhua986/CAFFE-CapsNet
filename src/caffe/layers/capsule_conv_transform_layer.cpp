@@ -167,7 +167,7 @@ void CapsuleConvTransformLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& 
   const int total_output_dim = output_capsule_dim0_ * output_capsule_dim1_;
   const int total_input_dim = input_capsule_dim0_ * input_capsule_dim1_;
   const int total_input_num = input_capsule_num_ * input_h_ * input_w_;
-  const int total_output_num = output_capsule_num_ * output_h_ * output_w_;
+  //const int total_output_num = output_capsule_num_ * output_h_ * output_w_;
   if (this->param_propagate_down_[0]) {
     const Dtype* top_diff = top[0]->cpu_diff();
     const Dtype* bottom_data = bottom[0]->cpu_data();
