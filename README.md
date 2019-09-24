@@ -44,39 +44,7 @@ Please cite Caffe in your publications if it helps your research:
       Year = {2014}
     }
 
-# P-CapsNets
-This repository is for the paper [Capsule Networks without Routing procedures](). 
-```
-layer {
-  name: "cap_conv1"
-  type: "Tensor"
-  bottom: "squash1"
-  top: "cap_conv1"
-  capsule_transform_param {
-    weight_filler {
-      type: "msra"
-    }
-    stride: 2
-    kh: 3
-    kw: 3
-    input_capsule_num: 8
-    output_capsule_num: 16
-    output_capsule_shape {
-      dim: 2
-      dim: 4
-      dim: 8
-    }
-    input_h: 28
-    input_w: 28
-    input_capsule_shape {
-      dim: 2
-      dim: 4
-      dim: 8
-    }
-    bias_term: false
-  }
-}
-```
+
 
 
 # CAFFE-CapsNet
