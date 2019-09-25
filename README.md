@@ -45,6 +45,45 @@ Please cite Caffe in your publications if it helps your research:
     }
 
 
+# P-CapsNet
+This part is for the paper [Capsule Networks without Routing procedures]
+
+```
+layer {
+  name: "conv1"
+  type: "Tensor"
+  bottom: "data"
+  top: "conv1"
+  capsule_conv_param {
+    weight_filler {
+      type: "msra"
+    }
+    stride: 2
+    kh: 3
+    kw: 3
+    input_capsule_num: 1
+    output_capsule_num: 1
+    output_capsule_shape {
+      dim: 1
+      dim: 1
+      dim: 32
+    }
+    input_h: 28
+    input_w: 28
+    input_capsule_shape {
+      dim: 1
+      dim: 1
+      dim: 1
+    }
+    bias_term: false
+  }
+}
+```
+## Training on MNIST
+To train a P-CapsNet on MNIST, run
+```
+sh examples/mnist/train_new_capsule.sh
+```
 
 
 # CAFFE-CapsNet
