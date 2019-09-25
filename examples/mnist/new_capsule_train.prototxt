@@ -1,0 +1,308 @@
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "data/mnist/mnist_train_lmdb"
+    batch_size: 128
+    backend: LMDB
+  }
+}
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "data/mnist/mnist_test_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Tensor"
+  bottom: "data"
+  top: "conv1"
+  capsule_conv_param {
+    weight_filler {
+      type: "msra"
+    }
+    stride: 2
+    kh: 3
+    kw: 3
+    input_capsule_num: 1
+    output_capsule_num: 1
+    output_capsule_shape {
+      dim: 1
+      dim: 1
+      dim: 32
+    }
+    input_h: 28
+    input_w: 28
+    input_capsule_shape {
+      dim: 1
+      dim: 1
+      dim: 1
+    }
+    bias_term: false
+  }
+}
+
+layer {
+  name: "cap_relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+  relu_param{
+    negative_slope: 1e-1
+  }
+}
+
+layer {
+  name: "squash1"
+  type: "Squash"
+  bottom: "conv1"
+  top: "squash1"
+  squash_param {
+    capsule_dim: 8
+  }
+}
+
+layer {
+  name: "conv2"
+  type: "Tensor"
+  bottom: "squash1"
+  top: "conv2"
+  capsule_conv_param {
+    weight_filler {
+      type: "msra"
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 1
+    output_capsule_num: 4
+    output_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 16
+    }
+    input_h: 13
+    input_w: 13
+    input_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 8
+    }
+    bias_term: false
+  }
+}
+layer {
+  name: "cap_relu2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+  relu_param{
+    negative_slope: 1e-1
+  }
+}
+layer {
+  name: "squash2"
+  type: "Squash"
+  bottom: "conv2"
+  top: "squash2"
+  squash_param {
+    capsule_dim: 8
+  }
+}
+
+layer {
+  name: "conv3"
+  type: "Tensor"
+  bottom: "squash2"
+  top: "conv3"
+  capsule_conv_param {
+    weight_filler {
+      type: "msra"
+    }
+    stride: 2
+    kh: 3
+    kw: 3
+    input_capsule_num: 4
+    output_capsule_num: 8
+    output_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 8
+    }
+    input_h: 11
+    input_w: 11
+    input_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 16
+    }
+    bias_term: false
+  }
+}
+layer {
+  name: "cap_relu3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+  relu_param{
+    negative_slope: 1e-1
+  }
+}
+layer {
+  name: "squash3"
+  type: "Squash"
+  bottom: "conv3"
+  top: "squash3"
+  squash_param {
+    capsule_dim: 8
+  }
+}
+layer {
+  name: "conv4"
+  type: "Tensor"
+  bottom: "squash3"
+  top: "conv4"
+  capsule_conv_param {
+    weight_filler {
+      type: "msra"
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 8
+    output_capsule_num: 4
+    output_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 16
+    }
+    input_h: 5
+    input_w: 5
+    input_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 8
+    }
+    bias_term: false
+  }
+}
+layer {
+  name: "cap_relu4"
+  type: "ReLU"
+  bottom: "conv4"
+  top: "conv4"
+  relu_param{
+    negative_slope: 1e-1
+  }
+}
+layer {
+  name: "squash4"
+  type: "Squash"
+  bottom: "conv4"
+  top: "squash4"
+  squash_param {
+    capsule_dim: 8
+  }
+}
+layer {
+  name: "conv5"
+  type: "Tensor"
+  bottom: "squash4"
+  top: "conv5"
+  capsule_conv_param {
+    weight_filler {
+      type: "msra"
+    }
+    stride: 1
+    kh: 3
+    kw: 3
+    input_capsule_num: 4
+    output_capsule_num: 10
+    output_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 8
+    }
+    input_h: 3
+    input_w: 3
+    input_capsule_shape {
+      dim: 1
+      dim: 4
+      dim: 16
+    }
+    bias_term: false
+  }
+}
+layer {
+  name: "cap_relu5"
+  type: "ReLU"
+  bottom: "conv5"
+  top: "conv5"
+  relu_param{
+    negative_slope: 1e-1
+  }
+}
+layer {
+  name: "squash5"
+  type: "Squash"
+  bottom: "conv5"
+  top: "squash5"
+  squash_param {
+    capsule_dim: 32
+  }
+}
+layer {
+  name: "cap_len"
+  type: "CapsuleLen"
+  bottom: "squash5"
+  top: "cap_len"
+  include {
+    phase: TEST
+  }
+  capsule_len_param {
+    num_class: 10
+  }
+}
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "cap_len"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: "margin"
+  type: "MarginLoss"
+  bottom: "squash5"
+  bottom: "label"
+  top: "loss"
+  margin_param {
+    num_class: 10
+    m_upper_bound: 0.5
+    m_lower_bound: 0.1
+    lambda: 0.5
+  }
+}

@@ -1,0 +1,22 @@
+# The train/test net protocol buffer definition
+net: "examples/mnist/new_capsule_train.prototxt"
+test_iter: 100
+# Carry out testing every 500 training iterations.
+test_interval: 10000
+# The base learning rate, momentum and the weight decay of the network.
+base_lr: 1e-2
+momentum: 0.9
+momentum2: 0.999
+lr_policy: "step"
+gamma: 0.5
+stepsize: 4000
+# Display every 100 iterations
+display: 100
+# The maximum number of iterations
+max_iter: 40000
+# snapshot intermediate results
+snapshot: 40000
+snapshot_prefix: "examples/mnist/new_capsule_final"
+type: "Adam"
+solver_mode: GPU
+test_initialization: false
