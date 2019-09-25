@@ -79,7 +79,7 @@ layer {
   }
 }
 ```
-## Training on MNIST
+# Training P-CapsNets on MNIST
 To train a P-CapsNet on MNIST, run
 ```
 sh examples/mnist/train_new_capsule.sh
