@@ -59,6 +59,11 @@ message FillerParameter {
     AVERAGE = 2;
   }
   optional VarianceNorm variance_norm = 8 [default = FAN_IN];
+  optional int32 cap_in_num = 9;
+  optional int32 cap_out_num = 10;
+  optional float cap_mean = 11 [default = 0];
+  optional float cap_std = 12 [default = 0.01];
+  optional float cap_dim = 13;
 }
 
 message NetParameter {
@@ -412,6 +417,8 @@ message LayerParameter {
   optional DynamicRoutingParameter dr_param = 160;
   optional CapsuleDeconvTransformParameter capsule_deconv_transform_param = 161;
   optional CapsuleDeconvRoutingParameter capsule_deconv_routing_param = 162;
+  optional CapsuleDeconvParameter capsule_deconv_param = 163;
+  optional CapsuleConvParameter capsule_conv_param = 164;
   optional InputParameter input_param = 143;
   optional LogParameter log_param = 134;
   optional LRNParameter lrn_param = 118;
@@ -933,6 +940,36 @@ message CapsuleConvRoutingParameter {
   optional uint32 input_w = 9; 
 }
 
+message CapsuleConvParameter {
+  optional FillerParameter weight_filler = 1; // The filler for the weight
+
+  optional uint32 stride = 2; 
+  optional uint32 kh = 3; 
+  optional uint32 kw = 4; 
+  optional uint32 input_capsule_num = 5; 
+  optional uint32 output_capsule_num = 6; 
+  optional BlobShape output_capsule_shape = 7;
+  optional uint32 input_h = 8; 
+  optional uint32 input_w = 9; 
+  optional BlobShape input_capsule_shape = 10;
+  optional FillerParameter bias_filler = 11; // The filler for the bias
+  optional bool bias_term = 12 [default = true]; // whether to have bias terms
+  optional uint32 group = 13 [default = 1]; 
+}
+
+message CapsuleDeconvParameter {
+  optional FillerParameter weight_filler = 1; // The filler for the weight
+
+  optional uint32 stride = 2; 
+  optional uint32 kh = 3; 
+  optional uint32 kw = 4; 
+  optional uint32 input_capsule_num = 5; 
+  optional uint32 output_capsule_num = 6; 
+  optional BlobShape output_capsule_shape = 7;
+  optional uint32 input_h = 8; 
+  optional uint32 input_w = 9; 
+  optional BlobShape input_capsule_shape = 10;
+}
 message CapsuleDeconvRoutingParameter {
   optional FillerParameter weight_filler = 1; // The filler for the weight
 
@@ -941,7 +978,7 @@ message CapsuleDeconvRoutingParameter {
   optional uint32 kw = 4; 
   optional uint32 input_capsule_num = 5; 
   optional uint32 output_capsule_num = 6; 
-  //optional BlobShape output_capsule_shape = 7;
+  optional BlobShape output_capsule_shape = 7;
   optional uint32 input_h = 8; 
   optional uint32 input_w = 9; 
   optional BlobShape input_capsule_shape = 10;
@@ -1009,6 +1046,7 @@ message RandVecParameter {
 
 message SquashParameter {
   optional uint32 capsule_dim = 1;
+  optional float a = 2 [default = 1.0];
 }
 
 message InputParameter {
@@ -1479,6 +1517,8 @@ message V1LayerParameter {
   optional CapsuleReluParameter capsule_relu_param = 80;
   optional CapsuleDeconvTransformParameter capsule_deconv_transform_param = 81;
   optional CapsuleDeconvRoutingParameter capsule_deconv_routing_param = 82;
+  optional CapsuleDeconvParameter capsule_deconv_param = 83;
+  optional CapsuleConvParameter capsule_conv_param = 84;
   optional LRNParameter lrn_param = 18;
   optional MemoryDataParameter memory_data_param = 22;
   optional MVNParameter mvn_param = 34;
