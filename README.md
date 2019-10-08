@@ -256,7 +256,6 @@ sh examples/cifar10/train_dr.sh
 sh examples/mnist/train_capsule_deconv.sh
 ```
 
-Please send email to chenzhenhua986@gmail.com for questions.
 
 
 
