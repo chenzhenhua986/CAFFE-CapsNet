@@ -46,13 +46,7 @@ Please cite Caffe in your publications if it helps your research:
 
 
 # P-CapsNet
-This part is for the paper [Capsule Networks without Routing procedures](https://openreview.net/forum?id=B1gNfkrYvS) Below is an example of adding a capsule layer. The primary code can been seen at [tensor_layer.cpp](https://github.com/chenzhenhua986/CAFFE-CapsNet/blob/master/src/caffe/layers/tensor_layer.cpp)
-
-For cuda-accelerated version, please see 
-```
-src/caffe/layers/capsule_conv_layer.cu
-```
-Note that the current acclerated version only supports the 2D tensor case. 
+This part is for the paper [Capsule Networks without Routing procedures](https://openreview.net/forum?id=B1gNfkrYvS)  The primary code can been seen at [tensor_layer.cpp](https://github.com/chenzhenhua986/CAFFE-CapsNet/blob/master/src/caffe/layers/tensor_layer.cpp). For cuda-accelerated version, please see [capsule_conv_layer.cu](https://github.com/chenzhenhua986/CAFFE-CapsNet/blob/master/src/caffe/layers/capsule_conv_layer.cu). Note that the current acclerated version only supports the 2D tensor case. Below is an example of adding a capsule layer of P-CapsNets.
 
 ```
 layer {
