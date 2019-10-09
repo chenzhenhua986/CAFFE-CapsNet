@@ -79,7 +79,7 @@ layer {
   }
 }
 ```
-To train a P-CapsNet model on MNIST, run
+To see a full example, please check [new_capsule_train.prototxt](https://github.com/chenzhenhua986/CAFFE-CapsNet/blob/master/examples/mnist/new_capsule_train.prototxt). To train a sample P-CapsNet model on MNIST, run
 ```
 sh examples/mnist/train_new_capsule.sh
 ```
