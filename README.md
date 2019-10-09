@@ -94,7 +94,7 @@ sh examples/mnist/train_new_capsule.sh
 
 
 # CAFFE-CapsNet
-This part implemented the idea of the paper [Generalized Capsule Networks with Trainable Routing Procedure]. 
+This part implements the idea of the paper [Generalized Capsule Networks with Trainable Routing Procedure]. 
 
 G-CapsNet makes the rouing prodedure become part of the training process, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. 
 
