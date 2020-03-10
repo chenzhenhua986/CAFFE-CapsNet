@@ -85,15 +85,176 @@ sh examples/mnist/train_new_capsule.sh
 ```
 
 
+# Other versions of CapsNets
+This part implements the idea in the paper [Generalized Capsule Networks with Trainable Routing Procedure]. 
 
-## Training CaspNets with dynamic routing on MNIST & CIFAR10
+G-CapsNet makes the rouing prodedure become part of the training process, it supports both "full-connected" version of CapsNet as well as "convolutional" version of CapsNet. 
+
+G-CapsNet is tested on MNIST and achieves comparible performance as normal CapsNet.
+
+## Guidline
+To add a full-connected capsule layer, you need to add one 'CapsuleTransform' layer and one 'CapsuleRouting' layer,
+
+```
+layer {
+  name: "cap_transform"
+  type: "CapsuleTransform"
+  bottom: "squash1"
+  top: "cap_transform"
+  capsule_transform_param {
+    input_capsule_dim: 8
+    output_capsule_dim: 16
+    output_capsule_num: 10
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "cap_routing"
+  type: "CapsuleRouting"
+  bottom: "cap_transform"
+  top: "cap_routing"
+  capsule_routing_param {
+    input_capsule_num: 1152
+    output_capsule_dim: 16
+    output_capsule_num: 10
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+```
+To add a convolutional capsule layer, you need to add one 'CapsuleConvTransform' layer and one 'CapsuleConvRouting' layer,
+```
+layer {
+  name: "cap_conv_transform"
+  type: "CapsuleConvTransform"
+  bottom: "squash1"
+  top: "cap_conv_transform"
+  capsule_conv_transform_param {
+    input_h: 14
+    input_w: 14
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    input_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "cap_conv_routing"
+  type: "CapsuleConvRouting"
+  bottom: "cap_conv_transform"
+  top: "cap_conv_routing"
+  capsule_conv_routing_param {
+    input_h: 14
+    input_w: 14
+    stride: 2
+    kh: 4
+    kw: 4
+    input_capsule_num: 2
+    output_capsule_num: 32
+    output_capsule_shape {
+      dim: 4  
+      dim: 4
+    }
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+```
+To convert normal activations to 'capsules' across feature maps, please use 'CapsuleReshape' layer. Othewise, use 'Reshape' layer.
+```
+layer {
+  name: "reshape"
+  type: "CapsuleReshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  capsule_reshape_param {
+    capsule_dim: 8
+  }
+}
+
+
+layer {
+  name: "reshape"
+  type: "Reshape"
+  bottom: "conv2"
+  top: "conv2_reshaped"
+  reshape_param {
+    shape {
+      dim: 0  
+      dim: -1
+      dim: 8 
+    }
+  }
+}
+```
+
+## Training on MNIST
+To train a "full-connected" version of G-CapsNet, run
+```
+sh examples/mnist/train_full_connected_capsule.sh
+```
+To train a "convolutioal" version of G-CapsNet, run
+```
+sh examples/mnist/train_g_conv_capsule.sh 
+```
+To train a baseline (Please read the paper for more details), run
+```
+sh examples/mnist/train_baseline.sh 
+```
 To train the CapsNet with dynamic routing in the orignal paper, run
 ```
 sh examples/mnist/train_dr.sh 
+```
 
+## Training on CIFAR10
+To train a "full-connected" version of G-capsNet, run
+```
+sh examples/cifar10/train_full_connected.sh
+```
+To train a baseline (Please read the paper for more details), run
+```
 sh examples/cifar10/train_baseline.sh
 ```
 
+To train a multi_layer CapsNet, run
+```
+sh examples/cifar10/train_multi_capsule_layer.sh
+```
+To train the CapsNet with dynamic routing in the orignal paper, run
+```
+sh examples/cifar10/train_dr.sh 
+```
+
+## Try capsule deconvolutional layer
+```
+sh examples/mnist/train_capsule_deconv.sh
+```
 
 
 
